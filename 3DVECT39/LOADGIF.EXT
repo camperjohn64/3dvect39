@@ -1,0 +1,33 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : loadgif.inc
+; Included from: Your program
+; Description  : Include file for LOADGIF.ASM
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; John Mccarthy would really love to work for a company programming Robots
+; or doing some high intensive CPU work.  Hint. Hint.
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+         extrn _loadgif:near
+         extrn _loadgif_lzw:near
+
+         extrn _loadgif_getdword:near, _loadgif_getword:near, _loadgif_getbyte:near, _loadgif_input:dword
+
+

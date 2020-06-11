@@ -1,0 +1,7 @@
+
+extrn    _mod_init:near, _mod_uninit:near
+extrn    _mod_load:near, _mod_play:near, _mod_stop:near
+extrn    _mod_sample_play:near
+extrn    _ordmod:byte, _currow:byte
+
+

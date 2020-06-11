@@ -1,0 +1,44 @@
+
+extrn    _vccmnd:byte, _vccntrl:byte, _vcsbeg:dword, _vclbeg:dword
+extrn    _vclend:dword, _vcfreq:word, _vcpan:byte, _vcvol:byte
+extrn    _sfxnumvoices:byte, _mix_volume:byte, _freqtbl:word
+extrn    _sfxmem:dword
+
+extrn    _sfx_find:near
+extrn    _sfx_init:dword
+extrn    _sfx_uninit:dword
+extrn    _sfx_putram:dword
+extrn    _sfx_getram:dword
+extrn    _sfx_relvolume:near
+extrn    _sfx_setvolume:near
+extrn    _sfx_getfreq:dword
+
+extrn    _sfxmem:dword
+extrn    _sfxsign:byte
+extrn    _sfxram:dword
+extrn    _sfxnumvoices:byte
+extrn    _sfxtype:byte
+
+extrn    _gusport:word, _gusirq:byte
+extrn    _gus_init:near, _gus_uninit:near, _gus_putram:near, _gus_getram:near
+extrn    _gus_find:near, _gus_ask:near, _gus_shutup:near
+extrn    _gus_handler:near, _gus_getfreq:near
+
+extrn    _sb_find:near, _sb_init:near, _sb_uninit:near, _sb_putram
+extrn    _sb_getram:near, _sb_getdmacount:near, _sb_getfreq:near
+
+extrn    _sbport:word, _sbirq:byte, _sbdmabuffer:dword, _sbsamples:dword
+extrn    _sbdmasize:dword, _sbmixspeed:word, _sbvoltables:dword
+
+         vol = 1
+         pan = 2
+         freq = 4
+         play = 8
+         cont = 16                          ; continue with SB sample (for next chunk, sb only)
+         shutup = 32
+
+         loop_on = 8
+         loop_bi = 16
+         loop_rev = 64
+
+

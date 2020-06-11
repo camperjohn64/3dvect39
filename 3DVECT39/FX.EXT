@@ -1,0 +1,6 @@
+
+  extrn _vcstarts:dword
+
+  extrn _load_sams:near, _play_sample:near
+
+

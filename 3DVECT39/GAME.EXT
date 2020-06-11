@@ -1,0 +1,6 @@
+
+         extrn _determine_panning:near
+         extrn _determine_volume:near
+         extrn _rnd:near
+
+

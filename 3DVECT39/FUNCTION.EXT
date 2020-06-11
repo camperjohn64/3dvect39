@@ -1,0 +1,68 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : move.ext
+; Included from: Main Assembley Module
+; Description  : Externals move.asm
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+         extrn _init_object:near
+         extrn _move_si:near
+         extrn _twist_si:near
+         extrn _twist_xonly:near
+         extrn _twist_yonly:near
+         extrn _twist_zonly:near
+         extrn _updvectors:near
+         extrn _calc_angles:near
+         extrn _calc_middle:near
+         extrn _get_displacement:near
+         extrn _put_object:near
+         extrn _get_location:near
+         extrn _set_angle:near
+         extrn _get_angle:near
+         extrn _set_shape:near
+         extrn _set_object_on:near
+         extrn _set_object_off:near
+         extrn _set_sub_object_on:near
+         extrn _set_sub_object_off:near
+         extrn _use_full_rotations:near
+         extrn _use_no_rotations:near
+         extrn _set_to_hi_bitmap:near
+         extrn _set_to_lo_bitmap:near
+         extrn _set_bitmap_scaling:near
+         extrn _search_next_available_object:near
+         extrn _point_it:near
+         extrn _point_dir:near
+         extrn _point_dir_time:near
+         extrn _point_to:near
+         extrn _set_speed:near
+         extrn _set_xyzadds:near
+         extrn _set_xyzvadds:near
+         extrn _point_time:near
+         extrn _time_to_point:near
+         extrn _nullpalette:dword
+         extrn _set_xref_palette:near
+         extrn _fix_xangle:near
+         extrn _fix_xangleq:near
+         extrn _subtract_camera:near
+         extrn _relative_velocity:near
+         extrn _add_xyzadds:near
+         extrn _get_xyzadds:near
+
+

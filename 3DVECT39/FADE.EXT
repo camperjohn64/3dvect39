@@ -1,0 +1,43 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : 3d.ext
+; Included from: Any program which requires data from 3D1.ASM, 3D2.ASM, 3D3.ASM
+; Description  : Externals for 3D1.ASM, 3D2.ASM, 3D3.ASM
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+         extrn _slidebytes:near
+         extrn _slidewords:near
+         extrn _fade_all:near
+         extrn _wait_for_fade:near
+         extrn _fade_palette:near
+         extrn _fade_palette_read:near
+         extrn _get_palette:near
+         extrn _put_palette:near
+         extrn _stop_fade:near
+
+         extrn _palette1:byte
+         extrn _palette2:byte
+         extrn _sourcepal:dword
+         extrn _destpal:dword
+         extrn _fadestep:dword
+         extrn _fadestatus:byte
+         extrn _default_palette:byte
+
+

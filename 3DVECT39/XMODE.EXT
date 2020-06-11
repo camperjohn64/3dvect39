@@ -1,0 +1,132 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : xmode.ext
+; Included from: Your Program
+; Description  : External Definitions
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; John Mccarthy would really love to work for a company programming Robots
+; or doing some high intensive CPU work.  Hint. Hint.
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+         extrn _screen_width:word
+         extrn _screen_height:word
+
+         extrn _last_page:word
+         extrn _page_addr:dword
+
+         extrn _page_size:word
+
+         extrn _display_page:word
+         extrn _active_page:word
+
+         extrn _current_page:dword
+
+         extrn _current_xoffset:word
+         extrn _current_yoffset:word
+
+         extrn _current_moffset:dword
+
+         extrn _max_xoffset:word
+         extrn _max_yoffset:word
+
+         extrn _charset_low:dword
+         extrn _charset_hi:dword
+
+         extrn _left_clip_mask:byte
+         extrn _right_clip_mask:byte
+
+         extrn _set_vga_modex:near
+         extrn _set_modex:near
+         extrn _clear_vga_screen:near
+         extrn _set_point:near
+         extrn _read_point:near
+         extrn _fill_block:near
+         extrn _draw_line:near
+         extrn _set_dac_register:near
+         extrn _load_dac_registers:near
+         extrn _read_dac_registers:near
+         extrn _set_active_page:near
+         extrn _get_active_page:near
+         extrn _set_display_page:near
+         extrn _get_display_page:near
+         extrn _get_x_offset:near
+         extrn _get_y_offset:near
+         extrn _sync_display:near
+         extrn _gprintc:near
+         extrn _tgprintc:near
+         extrn _print_str:near
+         extrn _tprint_str:near
+         extrn _set_display_font:near
+         extrn _draw_bitmap:near
+         extrn _tdraw_bitmap:near
+         extrn _copy_page:near
+         extrn _copy_bitmap:near
+         extrn _mode03:near
+         extrn _wipeoffpalette:near
+         extrn _turn_screen_off:near
+         extrn _turn_screen_on:near
+         extrn _flip_page:near
+
+drawline macro xx1,yy1,xx2,yy2,col
+         pushw xx1
+         pushw yy1
+         pushw xx2
+         pushw yy2
+         pushw col
+         call _draw_line
+         endm
+
+block    macro xx1,yy1,xx2,yy2,col
+         pushw xx1
+         pushw yy1
+         pushw xx2
+         pushw yy2
+         pushw col
+         call _fill_block
+         endm
+
+char     macro chr,xx,yy,fc                 ; plot character
+
+         push ax bx cx dx
+         mov ax,chr
+         push ax
+         mov ax,xx
+         push ax
+         mov ax,yy
+         push ax
+         mov ax,0
+         push ax
+         call _tgprintc
+
+         pop dx cx bx ax
+         mov ax,chr
+         push ax
+         mov ax,xx
+         add ax,1
+         push ax
+         mov ax,yy
+         sub ax,1
+         push ax
+         mov ax,fc
+         push ax
+         call _tgprintc
+         endm
+
+

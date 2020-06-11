@@ -1,0 +1,81 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : font.ext
+; Included from: Your Program
+; Description  : External Definitions
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; John Mccarthy would really love to work for a company programming Robots
+; or doing some high intensive CPU work.  Hint. Hint.
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+         extrn _fnt_tstring:near
+         extrn _fnt_string:near
+         extrn _initfont:near
+         extrn _put_at_top:near
+
+         extrn _number_eax:dword
+
+; screen text macros for font routines
+
+newtext  macro x,y,col
+         db -1
+         dw x,y
+         db col
+         endm
+
+border   macro _x1,_y1,_x2,_y2,col
+         db -2
+         dw _x1,_y1,_x2,_y2,col
+         endm
+
+fillarea macro _x1,_y1,_x2,_y2,col
+         db -3
+         dw _x1,_y1,_x2,_y2,col
+         endm
+
+hole     macro _x1,_y1,_x2,_y2,col
+         db -4
+         dw _x1,_y1,_x2,_y2,col
+         endm
+
+lowercase macro
+         db -5
+         endm
+
+uppercase macro
+         db -6
+         endm
+
+steelbox macro _x1,_y1,_x2,_y2,col,step
+         db -7
+         dw _x1,_y1,_x2,_y2,col,step
+         endm
+
+repeatbit macro _bitmaploc,_x1,_y1,_x2,_y2
+         db -8
+         dd _bitmaploc
+         dw _x1,_y1,_x2,_y2,col
+         endm
+
+textend  macro
+         db 0
+         endm
+
+

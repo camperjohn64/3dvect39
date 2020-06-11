@@ -1,0 +1,45 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : xmouse.ext
+; Included from: Your Program
+; Description  : External Definitions
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; John Mccarthy would really love to work for a company programming Robots
+; or doing some high intensive CPU work.  Hint. Hint.
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+         extrn _show_mouse:near             ; _show_mouse(int x,int y)
+         extrn _get_mouse_position:near
+         extrn _plot_mouse:near
+         extrn _remove_mouse:near
+         extrn _instant_mouse:near
+         extrn _compiled_mouse:near
+
+         extrn _mousex:word
+         extrn _mousey:word
+         extrn _mousebuttons:word
+
+         extrn _ismouse:word                ; 0 = mouse present
+         extrn _mousex1:word                ; clipping parameters for mouse
+         extrn _mousex2:word
+         extrn _mousey1:word
+         extrn _mousey2:word
+
+
