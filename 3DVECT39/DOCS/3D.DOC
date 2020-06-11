@@ -1,0 +1,564 @@
+
+    "Knowledge is Power, Power is Money"
+
+    3d Vectors Source
+
+     by John McCarthy (with a little help from his mommy:eg food)
+        1316 Redwood Lane
+        Pickering, Ontario, Canada
+        L1X 1C5
+
+       (905) 831-1944 (voice, always willing to talk, but do not call at 2am)
+
+    Documentation is in  no  defined  order. Sorry, I just  sorta  lumped  my
+    ideas together and ended up with this file.
+
+    Routines support any  x mode, - but  page  flipping  is  not  allowed  in
+    resolutions which allow only 1 page - see "pages" constant.
+
+    Full clipping is  performed  to  user  defined  areas - see  constants  in
+    equ.inc. They have   been   changed  to  memory  locations  for  variable
+    windowing or multiple screens.  For  windowing,  the last z locations for
+    that window must be remembered along with a slew of other  locations, see
+    vars.inc for that  info.  To change a window, save the lastz information,
+    reset with old lastz information and  then  call  set_clip  to change the
+    border clipping and screen center data.
+
+    The theoretical screen  is  considered  to be (x,y) with  0,0  being  the
+    center of the  screen!.   So  -100,-100  is  somewhere  on  the top left!
+    actual screen goes from (0,0) to (320,200)  -  or  whatever mode size you
+    select.  Matt Pritchard's routines (xmode.asm) assume  0,0  to be the top
+    left of the  screen  while  my routines (me = John = 3d.asm) consider the
+    screen center to be the constants xcenter and ycenter.
+
+    Visible space is  -4628196  to +4628196  on  all  axis  (approx).  Object
+    locations are 32 bit, vector routines are 16 bit, objects must be smaller
+    than 16 bit but are visable within about a 32 bit range.   (4 million, as
+    it is now,  is  very  very  far).   Since the camera is always at (0,0,0)
+    (relative), objects with (relative) negative z values are not seen.  This
+    cuts the z space to 0 to 4mil.  Visible space is always divided by 256 so
+    decimals can be allowed in adding, and  moving of objects.  Visible space
+    therefore, is actually  from -1.024 billion to +1.024  billion  with  the
+    lower byte having  no effect on the location.  Non-visible space is where
+    objects can be but won't appear on screen.   This space is a 256 *256*256
+    cube.  To racap:  you have 32 bit x,y,z axis with a visual  range  of  28
+    bits, where the  lower  8  bits don't affect the location.  (Lower 8 bits
+    don't count because locations are shr'ed)   i  say that the visable space
+    is "about" 4mil only because of the code in the make3d routine: this code
+    multiplies by a  constant  and then performs divide by  z  distance.   We
+    cannot allow the  multiply  to  overflow  and  therefore must truncate our
+    maximum distance to prevent this.  The  constants  for multiplication are
+    the screen ratio constants and the calculation to test for an overflow is
+    as such -2^32/2/256/(largest constant).  The constant I  have used is 464
+    for the y  ratio.   I  have  used  this  because  of my desire to use the
+    320x400 mode resolution.  Therefore, 4.3gig/2/256/464  = about 4 million -
+    our maximum visual  distance.  Like, trust me, you don't  really  need  a
+    larger universe.  Fixing  the  make  3d  routine  wont  allow  you to see
+    farther because then you would have to fix the rotate routine, etc, etc.
+
+     When defining a location: ebx = x, ecx = y, ebp = z
+     When defining a rotation: x = pitch, y = heading, z = yaw
+     si refers to object number, di refers to time.
+
+     Rotations occure in order:
+     zobject,xobject,yobject,ycamera,xcamera,zcamera - rotations are
+     compounded in matrix for faster computation.
+
+     Vmatrix is the matrix for object rotation.  Ematrix is  the  matrix  for
+     camera rotation.   If  you want know where a point in space will show up
+     on the screen, load ebx, ecx, ebp with your x,y,z point, subtract camera
+     location and  call erotate (eye rotate).   The  point  will  be  rotated
+     according to current camera angles.  Make sure that a call to setsincose
+     has taken place to set the eye rotation matrix (ematrix).
+
+     Polygon can handle any number of sides.  To draw a triangle,  make  last
+     point equal  to first point, eg 1,4,5,1. Number of sides of a polygon is
+     determined so that the polygon is  not  finished  until  the  last  side
+     equals the first side:  eg 1,7,6,14,13,4,2,1 would be a 7 sided polygon.
+     The constant maxsurfaces determines the  maximum number  of  surfaces an
+     object can have.  The constant maxpolys determines the maximum number of
+     connections a surface can have.
+
+     Sample shape data:
+
+     headerthing dd -1   ; distance that first resolution is visable, -1 = last
+                 dd offset thing - offset $ - 4
+
+     thing  dw 6        ; number of points
+            dw 4        ; number of surfaces
+            dw 25 dup (?) ; future use
+
+            dw x,y,z    ; point 0
+            dw x,y,z    ; point 1
+            dw x,y,z
+            ...
+
+            dw command
+            dw texture for side 1
+            dw texture for side 2
+            dw colour for side 1
+            dw colour for side 2
+            dw connection data eg (1,2,3,4,1)
+            dw [?,?,?] [optional surface normal if shade command used]
+            dw more connection data...
+            ...
+
+    There are several  commands  one can use for each surface.  Commands like
+    steel texture, always visible, opposite  colours,  etc.  View the objects
+    include file to see what/how to use them.
+
+    Bitmaps can be part of an object or be made as separate  objects.  I will
+    be using the  bitmaps  for  things  like  explosions, smoke (from damaged
+    planes/spaceships) and distant suns/solar system (U know, like in x-wing)
+    set the values bitx and bity to the  scaling  to  be used for each bitmap
+    and set userotate to himap as this  is the command to define  a  bitmaped
+    object.  vxs and  vys  are  the  additional  scaling  used for individual
+    objects (vxs+bitx = final scaling factor).  When part  of an object,  use
+    dw himap/lomap, point #, x scale, y scale.  Remember, scaling is added to
+    bitx and bity so objects have a base scale plus some individual scale.
+
+    Complex objects don't cut it for speed!  keep your objects simple and you
+    can have more of them on screen at once!  maximum speed is found with low
+    resolutions.  High resolutions with clipped borders also provide adequate
+    speed.  A shallow but wide screen (small y, big x) provides  better usage
+    of cpu time  than  a  tall  and thin screen.  One big object is faster to
+    compute than many small objects (if  same  surface area) an object viewed
+    from the  side  takes significantly less time to compute  than  if  viewed
+    from the top  due  to  the shallow y, large x idea.   Object  shapes have
+    abcd prefixes.  Therefore,  as  object  gets  farther from  camera,  less
+    points/surface must be calculated.  You  must  define  shapes  for  every
+    distance.   You can have only one distance/shape if you want or  you  can
+    have hundreds.
+
+       eg dd distance1
+          dd offset thing1 - offset $ - 4
+          dd distance2
+          dd offset thing2 - offset $ - 4
+          dd -1                            ; <- -1 is last distance flag
+          dd offset thing3 - offset $ - 4
+
+    Surface data must be entered counter clockwise so side  will be  visible.
+    Clockwize surfaces are  visible  from  other side and will not be plotted
+    (unless you use a surface command override, see objects.inc)
+
+    An increase in screen objects increases  cpu time.  However, if you  know
+    that you will always have the screen filled (in the case  of  floors, and
+    runways.) You can  disable  the clear_fill routine during those parts! if
+    the screen will be covered with background  walls  and  such, there is no
+    purpose to call  the  clear  routine to compute the next  part!   i  have
+    therefore added a  flag  for  the  clear_fill  routine  to use: when your
+    animation comes to the part when your looking at the ground or walls (and
+    there are NO empty spaces) toggle the  flag  to  skip  clear_fill and get
+    more  cpu  time.   This also works if you are approaching  an  object  or
+    large surface, since  the  new object will totally cover the previous one.
+    Another time trick is to have your main background object include the sky
+    (or area to be cleared) as part of the  object.  If you are going to have
+    walls that go  halfway  up  the  screen,  have them go halfway  with  the
+    regular walls and then make another surface that goes to the top  of  the
+    screen (or above  if you want to move around) with the colour 0.  You can
+    then deactivate the  clear_fill routine  and  still  have  the  animation
+    appear as if the walls are completely separate objects.
+
+    Sorting routine for objects (as opposed to sides) uses  last  z  value to
+    re-sort for the  next  plot.   If you plan on drawing static pictures you
+    may want to call makobjs twice to: 1)  draw  and find zeds, sort, then 2)
+    re-draw. This will be the only way (and easiest way) to  plot an accurate
+    picture of what   we   have.  Don't  worry  about  calling  twice  during
+    animations as the first picture will  be  the  only  picture  that is not
+    sorted.  During animations,  all  objects are sorted properly,  based  on
+    previous z.
+
+    Routines which are  expected to be used in animations have been optimized
+    but routines intended for use as background  and  title draw routines are
+    not intended to be fast.
+
+     PLEASE DOCUMENT YOUR CHANGES!!
+
+    Newfollow routine does  not  handle  object  lock on well  if  object  is
+    accelerating.  The routine  calculates  where  the  object  will be in di
+    frames and attempts to point the camera  to it in di frames.  However, if
+    the object is  accelerating, then the object will not  be  where  it  was
+    expected to be  at  that  time.   So  the  camera  must re-lock on to its
+    target.  This loop commences until the  camera  actually has locked on to
+    the target object, from this point on, the camera will  follow the object
+    regardless of motion.   The  re-lock on sequence takes the last number of
+    frames and divides it by two, so the re-lock on loop will move toward  an
+    accelerating object at an accelerating rate.
+
+    General overview: locations are 32  bit  -2.1Gig  to  +2.1Gig, angles are
+    16bit from 0-65535 degrees, 4 quadrants - 4096 entries each quadrant.
+
+    Variables in vector routine are 16bit.  cosine and sine  list  are  words
+    but get converted into doublewords when used.
+
+     Some public routines: (not all, just some) See the top of the .asm files
+                           for complete lists of public routines.
+
+  arctan           +/*% arctan(rise/run)=arctan(cx/ax).  any quadrant, 16bit
+  calc_angles      +/*% calculate xy angles between object di and object si
+  calc_middle      +/*% calculate xy angles between object di and ebx,ecx,ebp
+  checkfront       +/*% test points (di,bp) (si,qds) (dx,qes) for clockwise
+  clear_fill       +/   clears write page using xupdate and yupdate variables
+  compound         + *% compounds  angles  of eye and angles of object into
+                        matrix
+  cosine           +/*% eax=cos(eax), 16bit input, 32bit output
+  drawvect         +    draw list of vectors using points, sides and order
+  erotate          +/*% rotate for angles of eye, 32bit, uses ematrix
+  fakedraw         +/   draw line in firstbyte  and  lastbyte tables from xy1
+                        to xy2
+  flip_page        +/   flip between pages 0 and 1, wait for vertical sync
+  get_displacement +/*% calculate difference between objects
+  initfont        #     initialize font pointers
+  initpages       #     initialize x-mode pages for flip_page to page 0
+  loadpoints       + *% load points into array, rotate and translate as we go
+  loadsurfs        + *  load surfaces, check if visible as we go
+  look_at_it       +/*  immediately  force  eyeax, eyeay to  look  at  object
+                        wherelook
+  make1obj         + *  make object si
+  make3d           +/*% make bx,cx,bp into bx,cx 2d pair, 16bit
+  makeobjs         +    make all objects then sorts based on last z location
+  move_to         # /*  move object si to bx,cx,bp - time di frames
+  newfollow       # /*  forces camera to follow object si, time to get there
+                        di
+  poly_fill        +/   uses oney,firstbyte and lastbyte to draw one surface
+  point_it         +/*  point object si at object di
+  point_dir        +/*  point object si in direction it is moving
+  point_to         +/*  point object si at location ebx,ecx,ebp
+  set_speed        +/*  calculate velocity based on angles
+  point_time       +/*  point obj di to bx,cx,bp in di frames
+  put_object       +/*  put object esi at location ebx,ecx,ebp
+  re_sort          +    sorts objects based on "finalzed" values
+  rotate           +/*% rotate bx,cx,bp (x,y,z) through matrix vrotate, 16bit
+  set_finall       +/*  calculate xsfinal for object (location)
+  set_finala       +/*  calculate vxsfinal for object (angles)
+  setmakeorder    #     resets order for makeobjs - for initialization
+  setsincose       +/   set sin and cos multipliers for eye rotations
+  setupbase       #     set up object base pointers to shapes
+  set_object_on     /*  turn object si on
+  set_object_off    /*  opposite
+  sine             +/*% ax=sin(ax), 16bit input, 32bit output
+  show_stars       +/   display stars in background
+  sort_list        +    sorts list of sides of polygon
+  twist_si         +/*  set angular velocity based on ebx,ecx,ebp and di(time)
+  updvectors       +/   updates vector xyz's and angles
+  where_si         +/*% return location of where object will be in di frames
+
+     Legend:
+
+       # used for initialization of code or new scene
+       + used regularly in animation loop
+       / can be used by user outside of animation loop if needed
+       * routine requires parameters passed in registers
+       % routine exits with results in registers
+       > routine wipes harddrive
+
+    There are more routines at the end of  3d.asm  for more general functions
+    like find the camera displacement and finding rotational  offsets between
+    two objects.  U figure them out - fairly self explanatory. Also check out
+    poly.inc for more 3d functions and math.inc for general math functions.
+
+    Drawvect  routine has a separate routine for drawing lines (as opposed to
+    surfaces).  The fake_line  routine and poly_fill routine could do the job
+    but they were too slow.  The line was drawn twice then filled just like a
+    polygon but now a separate routine clips  and  draws.  If you  need/want
+    to use this line  drawing  routine  it  has   been   separated  from  the
+    draw_vect  routine.  I  do  not use the xmode line draw by Matt Pritchard
+    as it does not allow for clipping.
+
+    Sin and cosin tables - 90 degrees is 16384, 180=32768...
+
+    Move_si routine - to move an object around, load up ebx, ecx and ebp with
+    the x,y,z locations of where you want the object to end up.  Load di with
+    the time you would like the object to take to get there. Load si with the
+    object number you want to move and call  move_si.  The updvectors routine
+    does the rest!
+
+    To look at an object.  either 1) put the object number  in  wherelook. or
+    2) load si  with the object to look at, load di with the time to move the
+    camera to the object, and call new_follow.
+
+    Just think, only  7 months ago (march '93), i had trouble  programming  a
+    batch file!
+
+  Shape data can be almost as large as you need it 'till it crashes. try a cube
+  20000x20000x20000.    Calculations  use  32  bit  registers  and  can  handle
+  up to 16 bit locations.  keeping the object size small will  allow  a  larger
+  visible space.  but larger objects will allow you to  get  closer  with  more
+  accuracy in the mathematics of rotations.
+
+  List of command bits to date: (for object definitions)
+
+  note: "visible" = "points appear counter-clockwise"
+
+  texture definitions:
+
+    0       - normal surface, no features, constant colour.
+    wavey   - steel texture for surface 0 = none,  colour  offset  determines
+              screen offset for texture.  eg 16+7 will use colour block 16-31
+              but make the sine wave texture 14 (7*2) lines down. this is  so
+              all sine wave textures do not appear on the same line.
+              windows and engines look good with this feature.
+    shade   - lambert shading bit, must have normal calculated or  at  least
+              have    free    space     for    pre_cal_lambert    to    use:
+              eg 128,16*1,1,2,3,1, ?,?,?<- these 3 words are surface normal!
+    inverse - inversion bit for shading option.  0=normal shading, 1=inverse
+              if option +4  is used, inversion  automatically  occures  when
+              other side is displayed.
+    glow    - =shade+inverse
+    last    - colour has same colour as previous surface (used when
+              you want gourad shading, but want to avoid  duplicate
+              calculations - don't set gourad bit if this  is  what
+              you use it for.) when this is used, the colour number
+              determines the new colour block to use.  the  shading
+              of this colour will be the same as the surface before
+              it, but the colour block can be different.
+    mesh    - screen door style of surface
+    stone   - texture map style surface, I just liked the way it looked..
+    glenz   - glenz vector surface - uses cross referancing palette for
+              changing on screen colours.
+
+  commands:
+
+    point   - defines a single point; must be repeated! eg dw 64,col,3,3
+    line    - if used, defines a line (must be set to define a true line)
+    himap   - if set, defines a bitmap,eg: point #, bitmap #, x scale,y scale
+    lomap   - uses 1/4 scaled bitmap (every 4'th pixel is sampled), fast
+
+    iterate - generate iteration if side visible (iteration = sub-object)
+
+    both    - side is always visible no matter angle, skips counter-clowise test
+            - "both sides have same texture"
+    double  - side is always visible but other side has high byte colour
+              "double sided surface"
+              note: if this is used, option "both" must not be used!!
+    onscr   - test if side is on screen - don't use if all points are
+              outside clipping parameters.
+    check   - dont plot this side, just use as test points for visibility.
+              this is mostly used with iterations.
+    matrix  - generate new matrix
+    sub-object - make subobject
+    gosub      - transfer loading of surface data elsewhere
+    return     - return from gosub
+
+
+  There are a kazillion more options - look in the  objects.inc  file  for  the
+  surface types and example objects.
+
+  There are two kinds of bitmaps and points.  Those which  are  inside  objects
+  and those which are separate objects themselves. if userotate object  command
+  is set to himap/point,then  the  entire  object  is  considered  as  a  point
+  or bitmap.  But if userotate is not set this way, then  a  normal  object  is
+  drawn and bitmaps then come from within the object definitions (below).  this
+  way, bitmaps and points can be either part of a larger object,  or  they  are
+  computed fast on their own. (eg explosions and bullets as  separate  objects)
+
+  Note: When writing surface descriptions, try to make the  first value unique
+  from any other first value.  this way, the sort routine  will  give  a  more
+  accurate sorting of sides. eg 1,3,6,1  2,4,1,2  rather than 1,3,6,1  1,2,4,1
+
+  to recap:
+
+         0 = constant colour, only visible from counter-clockwise side
+     wavey = sine texture
+     shade = shading - requires 3 blank words for surface normal eg dw 0,0,0
+   inverse = invert the shading direction, 0=normal, 1=sun is other way.
+      last = use intensity from previous surface (not colour, only intensity)
+     point = point
+      line = line
+     himap = bitmap (scalable, non-rotatable)
+     lomap = bitmap (scalable, non-rotatable)
+   iterate = generate iteration if side visible
+      both = always visible
+    double = always visible but other side has high byte colour,"double sided"
+     onscr = plot side only if all the following points are on the screen
+     check = dont plot side but use the following points as a test for visiblity
+
+  What you can't mix on a single surface: "double" with "both"!!
+
+  You do not have to define a point for the center of the  object.  the  point
+  0 defines the center of the object.  This is different from earlier versions
+
+  Remember that negative y (-y) is up, +y is down.  This is opposite  from our
+  regular grade 13 mathematics but it is consistant with the computers  screen
+  arrangement.  If your objects look funny, make sure you have this correct.
+
+  The shading for objects requires that 3  words be  present  after  the  side
+  definition.  These 3 words represent the surface normal to the side and  can
+  be either set by you (slow and tedious) by using the normal.bas program,  or
+  can be set up by the routine pre_cal_lambert.  This routine scans the object
+  to find surfaces that have the shading bit set (128).   The  surface  normal
+  will be calculated for that surface and stored in the 3 words set  aside  by
+  you.  If you remove the shading feature from a surface, make sure you remove
+  the extra 3 words or it will screw up.  But you knew that right.  To use the
+  routine pre_cal_lambert, load si with the object you wish to scan, and call.
+  make sure objbase points to the offset of the object.  si will be the object
+  number, eg 0,1,2,3, not the offset. The offset will come from objbase.
+
+  Each on-screen object can have it's own colour palette scheme by setting the
+  palxref offsets to a cross reference palette.  this uses the xlat command to
+  take the objects colour, and xlat it into a new colour  based  on  the  xref
+  table you provide.  each object can have it own xref table.  This way,  many
+  on-screen objects can use the same shape data while each is coloured  with a
+  different colour scheme (5 stuka  airplanes  all  coloured  differently, for
+  example)  You will find the palxref tables (for each object remember) in the
+  file equ.inc.  A routine set_xref_palette has been provided for you  so  you
+  can set the xref offset (this routine is in poly.inc)
+
+  To have a bitmap on the screen (scalable but non-rotatable) use option himap
+  in either userotate or as an object command.  Lomap  uses  the  same  bitmap
+  method but only draws every 4'th pixel - good for explosions and smoke.
+
+  onoff commands:
+
+  0 = object off          eg mov onoff[esi],2  ; turn on sub object
+  1 = main object on
+  2 = sub object on
+
+  userotate object commands:
+
+  0  = all rotations supported - full object
+
+  1  = camera rotations only - no compound, new loadpoints
+
+      object is same as when userotate=0 but will not allow any object specific
+      rotations.  this is used to speed up rendering of objects that are
+      stationary or objects that will always be pointing in the same direction.
+      make1obj routine then assumes angles = 0x, 0y, 0z
+
+      if this is used to define a sub-object (see main.asm for that green box
+      with those two sub-object blocks) then +1 option in userotate makes the
+      box angle/rotation independant from the main object.
+
+  himap = bitmap - no compound, no loadpoints, no sort and no drawvect
+  lomap = bitmap, 1/4 scale, faster than 32
+
+      if object is bitmap, then:
+
+      whatshape - indexer to which bitmap in bitbase list
+      xs,ys,zs  - point to bitmap location in space
+      vxs       - bitmap scaling (how big is bitmap).  note: bitmap is already
+                  scaled based on distance so you don't have to change this
+                  as the bitmap gets farther away.
+
+  point = point - no compound, no loadpoints, no sort and no drawvect
+
+      used for bullets.  could be used for stars but if you do  want  to  make
+      stars, make a specialized bitmap routine.  making stars as objects would
+      be too slow.  right now, bullets all have same colour, see  constant  in
+      equ.inc.  note:sept 29/93, stars routines now are a seperate specialized
+                     assembley routine. - stars.asm
+
+      xs,ys,zs  - point to bullet location in space
+
+  The locations of sub_objects are x/256 because of the way conversion between
+  real space co-ordinates and object co-ordinates  are   calculated.   Objects
+  are 256 times larger than their appearance in real space. This  allows  much
+  greater  accuracy  in  real  space!!    Eg ,  if  you have a  cube  500x500x
+  500 (which is really 1000 wide cause -500 to +500 is 1000  units)  then,  in
+  order to "move" accros the surface, you should only have to move 1000 units,
+  right?  Well here, you'll have to move 256000 units even though the cube  is
+  only 1000 units wide/tall/deep.  This is because the real space co-ordinates
+  are 24 bit (32bit/256).  This gives you greater accuracy in placing  objects
+  where you want them in space but still allows you to have very large objects
+
+  If your objects appear jittery when viewing close-up, make  them  physically
+  larger.  For example, double all the point  data  (makes  object  twice  the
+  size).  This way, the multiply routine has more  accuracy  when  calculating
+  rotations/3dpoints.
+
+  Example of how to draw a single polygon:
+
+           p1x equ -50
+           p1y equ -50
+           p2x equ -90
+           p2y equ 70
+           p3x equ 60
+           p3y equ 80
+
+           mov x1,p1x
+           mov y1,p1y
+           mov x2,p2x
+           mov y2,p2y
+           call fakeline  ; draw in buffer
+
+           mov x1,p2x
+           mov y1,p2y
+           mov x2,p3x
+           mov y2,p3y
+           call fakeline  ; draw in buffer
+
+           mov x1,p3x
+           mov y1,p3y
+           mov x2,p1x
+           mov y2,p1y
+           call fakeline  ; draw in buffer
+
+           mov colq,7
+           mov steel,-1
+           call poly_fill ; fill polygon on screen
+
+           call flip_page ; show it...
+
+
+  A little note about polygon construction:
+
+   Polygons can only have angles less than 180 degrees. That is, they must be
+   round like circles, not hooky like a sickle.  eg:
+
+                         /\
+   /\                    \ \ invalid polygon
+   \ \ valid polygon     /  \
+    \ \                  \/\ \
+     \/                     \/
+                           ^
+                           |---------this angle is greater than 180degrees.
+
+  if you want to make this here^^^^, you must split it up into 2:
+                      /\               /\
+                      \ \              \ \
+          /\     +     \ \      =      /  \
+          \/            \ \            \/\ \
+                         \/               \/
+
+   So, an object like so:    ____
+                            / __ \
+                           /_/  \_\
+
+   must be drawn like so:
+                ____       ____
+     /\ + /\  + \__/   =  / __ \
+    /_/   \_\            /_/  \_\
+
+
+  Question:  How come my objects appear upside-down
+  Answer: Thats because the Y axis is inverted.  Positive X points to the
+          right, positive Z points away from you and positive Y points down.
+
+  Question: Ok, I make the Y value point down, now they still don't look
+            right - the surfaces are connected correctly but it looks wrong.
+  Answer: The most probable reason for this type of error is that the
+          connection data has been entered in reverse order.  Eg 3,4,5,2,7,3
+          should probably have been entered as 3,7,2,5,4,3. Remember, enter
+          the surfaces in Counter-Clock-Wise order.
+
+  If you don't like manual data entry (which I don't)  you  can  try  out the
+  converter DXF23DV which should be supplied with this package. Now just draw
+  your objects in AutoCAD and it will convert them into assembly connections
+  Remember, in AutoCAD +z points up, +y point away, in my package, +z  points
+  away, +y points down.  Draw the objects in Autocad as if +z is  up  and  my
+  converter will change the co-ordinate system for you.
+
+  Question: The objects look great from far away, but up  close,  the  appear
+            "jumpy" or the whole thing disappears.
+  Answer: Your using too small a scale factor.  If you have a cube  10x10x10,
+          the math routines don’t have much room to calculate a rotated object
+          Try making your objects bigger, like  1000x1000x1000.   The  reason
+          why the entire object may disappear is  that  the   center  of  the
+          object has passed to close  to  the  camera.   If  you  have  large
+          objects, you may want to cut them up  into  separate  sections  and
+          piece them together as a separate objects.
+
+
+
+
+

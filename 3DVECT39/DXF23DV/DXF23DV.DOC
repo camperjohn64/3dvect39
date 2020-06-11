@@ -1,0 +1,102 @@
+
+AutoCAD DXF to 3DVector Converter. V0.3  By John McCarthy (also does .PLG's)
+
+Options:
+
+DXF23DV inputname outputname [-s# -x# -y# -z# -mfilename -u# -v# -w# -l -n -q]
+
+  -x  x translation for object (before scale) - can be floating point, +z = up
+  -y  y translation for object (before scale) - can be floating point, +z = up
+  -z  z translation for object (before scale) - can be floating point, +z = up
+  -s  scale factor                            - can be floating point, +z = up
+  -u  x translation for object (after scale)  - integer only, +y = down
+  -v  y translation for object (after scale)  - integer only, +y = down
+  -w  z translation for object (after scale)  - integer only, +y = down
+  -m  materials list filename (corresponds to layer names)
+  -l  selective layer processing (only process layers that are found
+      in materials file)
+  -n  output true calculated surface normal (otherwise 0,0,0)
+  -q  negate Y axis
+  -b  sort surfaces based on surface normal (default=sort)
+
+  I you have trouble assigning a material to a line it may be because the
+  layer that the line is on has the shading option.  Lines  do  not  have
+  surface normals and therefore  cannot  have  the  shading  option  set.
+  If DXF23DV finds this occurance, it will insert  a default texture that
+  has no shading texture.  eg:  0,0,colour,0
+
+  If your a total knumbskull (like me) and  you  get  ACAD's  co-ordinate
+  system messed up (like me) you can use the -q option to  negate  the  Y
+  axis and reverse the orientation of the polygons.  This  will  fix  the
+  object if it appears to be "backwards".
+
+  Do not use punctuation in your material names or layer names.
+  A # sign in the materials file means a comment
+  A : means to put the following text AFTER the connection data.
+
+  Example materials file:
+
+      # This is a comment
+      # There must be 5 fields in each assigned texture!!
+
+      CONSTANT     0,0,0,colour0,0
+      SHADED       0,shade,0,colour1,0
+      SINE         0,wavey,0,colour2,0
+      BOTHSIDES    both,0,0,colour3,0
+      BOTHSHADE    both,shade,0,colour4,0
+      DOUBLESIDED  double,0,0,colour5a,colour5b
+      DOUBLESHADE  double,shade,shade,colour6a,colour6b
+      1SHADE2SINE  0,shade,wavey,colour7a,colour7b
+      1SINE2SHADE  0,wavey,shade,colour8a,colour8b
+      2SINE        double,wavey,wavey,colour9a,colour9b
+      SAMPLESIDE   this is,an example,of what,you can,do!
+      HIBITMAP     himap:,0,5,5
+
+  Material names can be as long as ACAD allows!
+
+  Currently there is a limit of 3000 points and 2000 surfaces to any DXF file.
+
+  Version 0.2:
+
+    REND386 .PLG files can now be converted.  Just enter the PLG  file  (.plg
+    extension is important) and the file  will  be  decoded  correctly.   The
+    information for the materials is just like DXF.  The 0x11AA in  the  .plg
+    is scanned for and the corresponsing material is substituted.
+
+    The materials file can now how the keyword RND in it to generate a random
+    number   between  0  and  255.  This  may  be  useful  for  sine  texture
+    mis-alignment.
+
+  Version 0.3:
+
+    Colons can be placed in materials to output text/data/comments after a
+    polygon face definition.
+     Consider a material like so
+      MATERIALXY   0,mesh,0,colourxy,0:;hello there
+     will return a face line like so
+            dw 0,mesh,0,colourxy,0,1,2,3,6,7,1;hello there
+
+    Bitmaps can now be defined in AutoCAD and then placed as part of an object.
+    Notice how I used the new and fancy colon option?
+     eg: a material of
+      HIBITMAP     himap:,0,5,5   ;testtest
+     will return a line of
+            dw himap,29,0,5,5   ;testtest
+
+    To implement the bitmap option, define a 3dface in AutoCAD   on  the  layer
+    hibitmap.  DXF23DV will find the layer, match it up with the material,  and
+    scan for the text "map" in the  material.  If it is found, it will make the
+    surface into a bitmap.  This is good for adding  explosions/static  bitmaps
+    to dead objects.  Check out XWING to see what I mean.
+
+  Version 0.4:
+
+    Connection data  is  sorted  according  to  surface  normal.   This  is  in
+    preparation for iteration handling.
+
+    Small bug with .PLG detection fixed. Also fixed a bug with the .PLG surface
+    loading.  Who uses .PLG's anyway right?  Fixed...
+
+    PFACES now work correctly
+
+

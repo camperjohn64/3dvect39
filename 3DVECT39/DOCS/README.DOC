@@ -1,0 +1,788 @@
+
+                          3d Vectors Source 3.9
+
+                        Smart Kids Don't Do Drugs!
+
+   Date of release - Oct 1/94
+
+   Written by: John McCarthy
+               1316 Redwood Lane
+               Pickering, Ontario.
+               Canada, Earth, Milky Way (for those out-of-towners)
+               L1X 1C5
+
+   Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+           Fidonet:  Brian McCarthy 1:229/15
+     RIME/Relaynet: ->CRS
+
+   Home phone,(905)831-1944, always willing to talk but don't call at 2 am eh!
+
+   God, this package is getting big...
+
+   Routines to be used by all for anything, just send me  a  copy  of  what
+   you've accomplished (final product), or at least send me a postcard from
+   someplace near where you live.
+
+   Many thanks to: Razor - for providing source for their demo.  This  gave
+                   me the idea of how to draw polygons in the first place.
+
+                   Mode X routines - Matt Pritchard
+
+                   Protected Mode Header - Tran
+
+                   Bitmap X-mode Scaling routine - John A. Slagel
+
+                   Technical support - Robin Ward
+                   (in no defined      Danny Hawrysio
+                       order)          Robert Johnston
+                                       Ciaran Gultniers
+                                       Mark Rosteck
+                                       Shawn Knight
+                                       Sebastian Dwornik
+                                       Adam Kurzawa
+                                       Adam Johns
+                                       Ciaus Tenche
+                                       Peter Gruhn
+                                       Sean Palmer
+                                       Alan Illeman
+                                       Rich Geldreich
+                                       Peter Hinz
+                                       Chris Didamo
+
+                   Food provided by - My Mommy
+
+  As noted above, this file would not  be  possible  without  other  people
+  giving away their source code.  I continue the tradition of "knowledge is
+  power" and give this away.  Most people who see this will never do a damn
+  thing with it but look at it and say "uh, so, what next?" so I don't want
+  you to register or anything dumb like that.  By the way, people who  want
+  money for crappy shareware progs can rot in hell.  But if you do  make  a
+  commercial game, and make billions, at least  send  me  a  postcard  from
+  the Bahamas OK!  Like I'm not going  to   refuse  a  cheque if  you  make
+  something commercial, but like I said, only 1 in a million  may  actually
+  have the time/effort/patience/guts/brains to make a commercial game.
+
+  The original Mode X routines have been  modified   to  support  protected
+  mode.  Many thanks Matt Pritchard for the X-Mode knowledge.  I  hope  you
+  don't mind my changing your routines.  Matt Pritchard can be  reached  at
+  P.O. Box 140264, Irving, TX  75014  USA.
+
+  The protected mode header has been supplied by TRAN and can be reached on
+  Sound Barrier BBS (718)979-6629.  I have included all of TRANs  protected
+  mode package because I really hate getting code from  someplace  and  not
+  getting the support for it.  I make no claim  to  any  of  this  code,  I
+  simply want to supply you with all the info to effectively work with this
+  3d vector package.  TRAN implies that you can reach him  on  internet  at
+  tran@phantom.com
+
+  The bitmap scale routine has been supplied by John A. Slagel.  Thanks  to
+  you as  well  where  ever  you  are.   The  scale  routine  now  supports
+  transparent bit-mapping.  As of this writing, John  A.  Slagel's  internet
+  access has been canceled and I have no other address for him.
+
+  If you want the original non-protected mode Vector  routines, I  can  dig
+  them up for you if you send me a  disk  or  something.   But  first,  ask
+  yourself, "Why would anyone want to  go back to  segmented  coding?"   If
+  you still want those  routines, hit  self  on  head  with  nearest  blunt
+  object and re-ask question.  (Many thanks TRAN)
+
+  Routines are heavily optimized for 3d  vectors.   Any  code/routine  that
+  slow is not intended to be used with animation and has  been  written  to
+  simply get the job done.  You will know which routines are slow/fast once
+  you look at the code.
+
+  I don't apologize for the lack  of  effective  documentation  or  example
+  programs as this code was written for my own use.  I would like to  spend
+  more time writing code than writing docs.  I also don't apologize for the
+  lack of universality of code execution.  For example, Matts xmode code is
+  callable from C but mine isn't.  Some of the routines must have registers
+  set up before entry and some require memory to be set up.  U figure which
+  is which.  It usually says at the beginning of the routine.   Once  again,
+  making  everything callable from C slows things down  and  this is what I
+  wanted to avoid.  Speed is the key considering it is for my own use.
+
+  You must have a 386 to run this.  If you only have a 286, get a  job  and
+  buy a real machine!
+
+  Also, I really hate people who give away their "source" code but actually
+  only give away the object file.  If these people are so embarrassed  about
+  their crappy code then we don't want your crappy object file.  Give  away
+  all or nothing.
+
+  It would be really nice if I got a postcard from some place near where you
+  live.
+
+    Some files in this zip:
+
+      main.asm      ; example program to show vectors
+      3d1.asm       ; 3d vector routines by John McCarthy, fast sort method
+      3d2.asm       ; 3d vector routines by John McCarthy, full sort method
+      3d3.asm       ; 3d vector routines by John McCarthy, tolerenced sort method
+      xmode.asm     ; xmode routines by Matt Pritchard
+      xmouse.asm    ; xmode/protected mode mouse routines
+      pmode.asm     ; protected mode routines by TRAN
+      file.asm      ; pmode file routines by TRAN
+      argc.asm      ; command line argument scanner by TRAN
+      stars.asm     ; plot stars
+      font.asm      ; screen setup routines
+
+      xmode.inc     ; files defining externals for linkage
+      xmouse.inc    ; with above asm files
+      pmode.inc     ; example: if you want to use some routines/data
+      3d.inc        ; from xmode.asm, use:include xmode.inc
+      file.inc
+      argc.inc
+      stars.inc
+      font.inc
+
+      xscale.inc    ; bitmap scaling routines
+      poly.inc      ; common 3d vector routines between 3d1,3d2 & 3d3
+      math.inc      ; math functions for 3d.asm
+      sin.inc       ; data tables for math functions: math.inc
+      arctan.inc    ; inverse tan function tables: math.inc
+      vars1/2.inc   ; variables for 3d.asm routine
+      equ.inc       ; list of constants
+
+      macros.inc    ; macros used throughout
+
+      qb.zip        ; qb quickbasic programs to generate sin and arctan tables
+      modex104.zip  ; (some of the) original files from Matt's modex104.zip
+
+      stone?.inc    ; shaded stone textures
+
+  Some bugs fixed for 2.1:
+
+    Mouse routine draw_bitmap fixed (start of bitmap is x and y). Fixes crash
+
+    Also, the mouse resolution has been divided by two to stop that dang  two
+    pixel movement!
+
+    Many bugs fixed in Xmode.asm conversion from segmented mode to protected
+    mode.  Too many protected mode bug fixes to list.
+
+    Also added some palette fading routines to xmode.asm
+
+    The big change is the new method of  sorting  surfaces.   Before,  objects
+    were sorted first, then surfaces within objects were sorted.  Now, drawing
+    an object simply draws the surfaces in   memory   and  then  ALL  surfaces
+    are sorted as a group.  This now allows small objects to go inside  larger
+    objects.  This is not possible in 3d1,  small objects will disappear.  The
+    3d1 file is faster but the 3d2 file has greater flexibility with  objects.
+    The old file is 3d1.asm while the full sorting file  is  3d2.asm.  To  use
+    you must call sort_list and drawvect after makeobjs (if using  3d2  -  the
+    full sort method).  See main1 and main2 for examples.   To  give  you  the
+    speed difference between the two, the calculation for a   bubble  sort  is
+    (n^2+n)/2 for number of times routine will sort.  In 3d1 - 30 objects with
+    30 sides will take 465 sorts * 30 objects + 465 to sort those  objects  is
+    =  14,415  loops.   But  3d2  uses  the  basic  30*30  sorts.   Therefore,
+    (900^2+900)/2 = 405,450 loops!  You can use 3d2 in portions and still  get
+    the speed of 3d1 if you know certain objects will be far or near (eg  land
+    scapes and stars are always far) and this can provide you with  the  speed
+    and versatility of objects going inside one another.  The only  difference
+    between 3d1 and 3d2 is the sort method - full objects then surfaces (3d1),
+    or all surfaces together (3d2).
+
+    Also made it possible to now have points (single dots) and  bitmaps  as
+    part of an object.  You no longer need to make a bitmap it's own object
+    but can now have it as part of another object.  It is still possible to
+    have bitmaps as their own objects (for explosions and bullets).     See
+    sphered cube and regular sphere in example file.
+
+  Optimizations for 3dvect22:
+
+    Better make1obj routine  now  uses  ematrix  more  efficiently  by  only
+    calculating matrix x,y and z as needed - makes better use  of  cpu  time
+    when there are many objects off screen (behind camera or too far lft/rgt
+    up/dwn)
+
+    Added more math functions
+
+    Optimized erotate when usez = no
+
+  Changes for 3dvect23:  Aug 10/93
+
+    Implemented new pmode.asm code by TRAN.  This replaces the  start32  code
+    and allows 3dvect to be run with memory managers like HIMEM  and  EMM386.
+    Many thanks to TRAN!  Note: Maximum speed is still found with  no  memory
+    managers - ie. raw memory.  Change all int 30h's to int 33h's.
+
+    Removed some common routines from 3d1 and 3d2 and put them in poly.inc to
+    avoid duplicate copies of routines.
+
+    Also added to xmode.asm routines to turn off the screen to stop flicker
+    when changing into xmode
+
+    I am currently writing this from my living room floor where I  have  been
+    laying for the last month due to a herniated disc in my lower back - fun!
+
+  Additions for 3dvect24:  Aug 29/93
+
+    The main addition for version 2.4 is the IRQ  routine  that  co-ordinates
+    itself  with  the  routine  updvectors.   The  IRQ  increments  the  byte
+    traces_past every time a vertical retrace occurs  (regardless  of   what
+    the vector routines are doing) and the routine updvectors (get it, up the
+    vectors - d=the, like the poor people say) anyway, updvectors  uses  this
+    value to make the objects/animation "jump" ahead and  skip  frames.   the
+    slower the computer or the greater number of objects  there  are  on  the
+    screen, the higher the value  traces_past  will  be  after  updating  the
+    screen.  Therefore, if you write your own game/animation, use this  value
+    to determine how fast the game should go - the IRQ is timed to match  the
+    vertical retrace so every time one passes by, traces_past gets +1. I have
+    two interrupts - a protected mode IRQ and a real mode IRQ. I did it  this
+    way so that if you want to add music or whatever, you can use either type
+    of IRQ.  Both add 1 to traces_past.  Also, I have timed  the  IRQ  to  be
+    close to the vertical retrace time but I don't know if  I  have  done  it
+    correctly.  If you notice that the out dx,al is not the way to  go  about
+    it, drop me a line with the correct method of  setting  the  8253  timer.
+    The value of traces_past will be from 1 to whatever (never 0 after trace)
+    Note: Version 2.6, problem fixed.
+
+    I also fixed a small bug in the updvectors routine - which is now  called
+    updvectors2, called by "updvectors".
+
+    I have also had a back operation to fix that herniated disc  and  am  now
+    sitting upright at my computer.  So I have this message for you:  Sit  up
+    straight at all occasions, bend from the knees, get two  people  to  lift
+    a heavy object, don't be macho,stand straight at all times,walk straight,
+    don't slouch when driving, don't over exercise, don't prop your head  up
+    with your arm when watching TV, (put adjective here) straight.  TAKE CARE
+    OF YOUR AMAZING MOTION MACHINE - YOUR BACK.   Learn  the  easy  way  from
+    someone who learnt the hard way - we're not invincible. STRAIGHT STRAIGHT
+    STRAIGHT! STRAIGHT! STRAIGHT! STRAIGHT! There, I'm done.
+
+  Some bugs fixed for 2.5:
+
+    Fixed the timer IRQ to have OUT 43h,AL (You'll never know the  difference
+    but I thought it would be a nice gesture)
+
+    I have also ripped a routine from someplace else  to  time  the  vertical
+    retrace and set the irq to this value.  This replaces the static variable
+    with a more accurate calculation for each computer's irq timing.
+
+    I also added a total retrace counter called "frame_number"  which  counts
+    from the beginning of any animation so you can, let's say at  2.5  minutes
+    into it, perform a certain function.  The  counter  is  only  reset  when
+    reset_raster_count is called (beginning of new animation sequence).
+
+    I have also changed the math routine setsincose so that if  you  are  not
+    using z rotations, you won't need to reset eyeaz to 0.  (Can be anything)
+    This really doesn't increase speed much though.
+
+    I optimized some of the imuls with a pre-calculated table. Just to remind
+    you:  Changing  video  modes  can occur within the program, but you  can
+    only change the vertical size, not the horizontal size (eg  swap  between
+    320x400 mode and 320x200 mode, or 360x480 mode   and  360x240  mode)  You
+    would only need to adjust the clipping limits and the make3d constants to
+    change modes while the program is  executing.   Re-assembley   would   be
+    required if you wanted to change into a different x-width mode.
+
+    Fixed the xmouse.asm routine plot_mouse.  It was  not  using  an  earlier
+    xmode bitmap change.
+
+    Robert Johnston now has the correct spelling to his name.
+
+    By the way, the mouse is supposed to look like  that!   Call   plot_mouse
+    without any page flipping if you want a regular mouse that remembers what
+    is behind it.
+
+  Version 2.6 doesn’t exist anymore:
+
+  Additional .asm files for 2.7:
+
+    A file has been added to put stars in  the  background.   Stars.asm  only
+    calculates the positions of stars that will be on or close to the screen.
+    The routine has two assembly modes - full stars or half stars.  The half
+    stars mode plots stars that are above the 0y axis.  This allows  you   to
+    have a flat surface (airfield/horizon) without calculating the  positions
+    of stars below the screen.  The routine is called show_stars.
+
+    I have added a macro to the file macros.inc to multiply  by  a  constant.
+    The macro is used as cmul result, value, constant.  eg  cmul eax,ecx,320.
+    Only  some values are supported but this will change  as  more  constants
+    are required.  This replaces a few lines of code in the  make3d  routines
+    so ratiox and ratioy imul's can be used by the user (you) without  having
+    to import the code from math.inc.  I  also  fixed  a  tini-eeni-wini  bug
+    in the non-fast imul routine - not that you care or anything...
+
+    God, I can't wait to get a 586...
+
+    I have also solved (?) the problem with files>64k not working,I have made
+    all 16 bit indexes to 32 bit indexes. The only remaining problem/drawback
+    is that the linking order must be such that the irq assembly follows the
+    protected mode header, eg: TLINK /3 pmode irq xx xxx xx xx.  I don't know
+    why the irq stuff doesn't work if is in the>64k block, maybe  because  it
+    has 16 bit real mode code in it or something, who knows...Just link it as
+    I have and you can do anything else you want in the 32 bit code  segment.
+
+    Because of  the  above,  I  have  moved  the  variables  traces_past  and
+    frame_number from 3d.asm to irq.asm. If you need the computer speed/frame
+    speed, you will have to have irq.inc in your assembly.  Don't  look  for
+    these variables in vars1.inc or vars2.inc anymore, they have  been  moved
+    to irq.asm.
+
+    Removed more common routines from 3d1 and 3d2 and put them in poly.inc.
+
+    John says hi to Sebastian...
+
+  Optimizations for 2.8:
+
+    Stars routine runs a tad faster.
+
+  Additions for 2.9: Sept 28,'93
+
+    I just had a brainstorm on how to calculate the 3d stars considering  the
+    stars  are  at  a  constant  distance  from  the  camera.   The  variable
+    perfect_stars has been added to allow the stars routine to calculate  non
+    perfect 3d stars. This makes the routine much faster, while it  basically
+    looks the same.  This is  possible  since  the  stars  are  always  at  a
+    constant distance from the camera.
+
+    I've also added more macros to the cmul macro.  That  is,  more  multiply
+    by constant macros...
+
+    OK people, how come I haven't gotten any postcards yet?  Does nobody read
+    this code?  Like, it only cost's 50 some odd cents for a stamp.   I mean,
+    tell me what the weather is like where you are, or  something  about  the
+    local news events.
+
+  Additions for 2.A (hex): Oct 1, '93
+
+    Variables xxxfinal[] have been added to the movement/rotate  routines  to
+    ensure correct final placement of an object.  This was necessary  due  to
+    errors when multiple additions of speed*time did  not  equal  the  actual
+    requested final position.  So, every  time  you change  the  angular  or
+    linear velocity, the  variables  final  position  must  be  set  to  tell
+    updvectors where that final position is.  If you do not want to calculate
+    the final positions yourself, two routines have been supplied  to  do  it
+    for you: set_finall - for linear calculations, and set_finala for angular
+    calculations.  But remember, if you have no intention of ever letting the
+    object come to rest, you don’t need to set finall or finala.   These  must
+    only be set if you are going to move an object from point a  to  point  b
+    and let it stay at point b - (without moving  it  again  before  it  ever
+    reaches point b).
+
+    Added a routine  called  twist_si.   This  sets  the  objects  rotational
+    velocity based on a 32 bit input.  Similar to move_si routine.
+
+    When  using  twist_si  or  move_si,  try  to   keep   the   time   small.
+    eg: <1000 frames.  this will prevent a "jump"  when  the  object  finally
+    stops moving/rotating.  if you want large time constants, call set_finall
+    or set_finala after calling move_si or twist_si respectively.   This  will
+    re-calculate the final position based on large  time/decimal  error  loss
+    and prevent the object from "jumping" at the  end  of  it's  cycle/count.
+    OR: call move_si or twist_si in sections, eg call it first as  you  would
+    normally (with correct time/distance/angles loaded)  then,  half  way  to
+    it's destination, call the routine again (with time/2).  This will re-cal
+    the speed better and will also prevent that "jump". (Did you get that?)
+
+    We will note that my number (as of Oct 4) gets changed to  the  905  area
+    code - (905) 831-1944.
+
+    Some routines  added - Point_it,  points object si at  object  di.   This
+    only affects the x and y angles, the z angle can still provide spin.
+
+    Point_to points object si to location ebx,ecx,ebp
+
+    Point_dir routine points object si in the direction it is moving.
+
+    Set_speed routine does the opposite of the above routine.   It  sets  the
+    speed of the object to the  direction  it  is  pointing.   si  =  object,
+    ebp = speed, di = lcount.  (lcount = linear counter, object stops when 0)
+
+    Point_time routine points object si to ebx,ecx,ebp in di frames
+
+    I managed to get my Suzuki GS1150 up to 240km/hr on the 401 today...
+
+  Features added to 2.B: Oct 6, '93
+
+    Shading like the pro's:  (Wait a minute, isn't that me?)
+
+    Routines added:
+
+    pre_cal_lambert   - scan object si and calculate surface normals
+    calc_normal       - from 3 points, returns normal vector ebx,ecx,ebp
+    lambert           - calculate surface normal rotation matrix for object si
+    set_up_all_lambert- scans objects from si to di and calls pre_cal_lambert
+    lrotate.          - given normal for surface, figures out intensity
+
+    I finally bought a book on assembly language today.   God,  there's  all
+    kinds of stuff I didn't know this computer can do.  Like xlat...bt...
+
+    I've included some old screen set up routines - font.asm and font?.inc
+    There not really font routines, just screen setup routines.
+
+    Also made the vector sort a little more accurate.
+
+  Many, many, many additions for 3.0: Nov 19, '93
+
+    THE OBJECT FORMAT HAS BEEN CHANGED!  Changes include addition of 25  words
+    at the beginning of the object to accommodate future revisions. But the big
+    change is that all points are now point+1.  eg what used to be 0,1,2,0  is
+    now 1,2,3,1.  This gives the user access to point 0, which is the  objects
+    center of gravity. (point 0,0,0).  The new format for  surface  definition
+    is:
+
+     dw commands, texture1,texture2,colour1,colour2, connections, [0,0,0]
+
+     where the commands determine what the  surface  is,  eg:polygon,  texture,
+     bitmap, point, line, along with the  visibility  and  iteration  commands.
+     While texture1 and color1 determine what the polygon will look like on the
+     first side, txt2 and col2 determine what the other side will look like.
+
+    Some optimizations in math.inc (thanks to my new assembler book, Oooo...)
+
+    I finally found out how to make a MAKE file.
+
+    We will notice my internet access has been corrected.
+
+    Optimized/fixed the calc_angles routine (not that you'll care or anything)
+
+    Iterations added to objects.  Now object surfaces can have surfaces within
+    surfaces within surfaces within surfaces...Example: a building has a  main
+    wall with many windows on it, on the windows there is a sign, on the  sign
+    there is a bug - if the sign isn't visible, don't plot the bug  -  if  the
+    window isn't visible, don’t plot the sign (or the bug) - if the  main  wall
+    isn't visible, don't plot anything.  This allows objects to be  very  very
+    detailed without wasting CPU time.  Iterations save MEGA cpu time!!!
+
+    Another sort method has been added - 3d3.asm.  This method uses parts from
+    both 3d1.asm and 3d2.asm.  How it  works  -  the  objects  are  sorted  as
+    individual objects  until  they  become  close  to  one  another  (set  by
+    collision tolerance value) then they get sorted as one object. This allows
+    objects to go through one another (and  still  be  sorted  correctly)  yet
+    avoids the CPU intensive sorting of hundreds of sides.   If  you  set  the
+    tolerance value to 0, the code will run just like 3d1.asm, if you  set  it
+    to 1billionx, the code will run like 3d2.asm - somewhere in the middle the
+    two sort methods mix.  (Note: 3d1.asm is still the fastest)
+
+    A routine has been added to allow the user to scan a file for a "[MARKER]"
+    or magic word.  The _findmarker routine scans a file and returns an offset
+    (32 bit) in the file as to where the marker was found.  This can  be  used
+    to load in mods/gifs and data from the  end  of  the  program  instead  of
+    having a separate data file(s).  This method is similar to the method used
+    in demos like UNREAL.EXE and CD2.EXE.  It could also be used to store data
+    in or modify the original program. This is not really related to 3d vector
+    programming though.
+
+    Relative surface colour option can use the  intensity  from  the  previous
+    surface.  This relieves the CPU from performing repetitive surface  normal
+    calculations.  Eg: set the first surface to gourad/lambert shading and set
+    all other surfaces with the same normal (angle) to use this intensity. The
+    object command to use the previous surface colour is  called  "last".  See
+    objects.inc or equ.inc.
+
+    Another method for testing if a side is visible has been implemented. Now,
+    as well the surface being counter-clockwise, you can also test if  all the
+    points are on the screen.  This can be either combined  with  the  counter
+    clockwise test or used on it's own.  I don't what good it is yet though...
+    Maybe  useful  when  combined  with  iterations?   The  test  works   even
+    if a large polygon covers the screen (like the side of a large building)
+
+    I have now made 3d1,3d2 and 3d3 all use the same animation format: eg call
+    init_tables before an animation then call makeobjs during  the  animation.
+    This is the same method for all 3 sorting types.  Although these  routines
+    call  different  routines  in  each file, they all end up doing  the  same
+    thing.
+
+    I actually found a bug in this thing! (yes one little  bug)  -  fixed  the
+    arctan function.
+
+    Extracted the clipped_line routine so you can use it anywhere. Clipped_line
+    routine draws from dx,cx to ax,bx colour bp, but does  it  with  Cartesian
+    cords - eg 0,0 is screen center,also updates clearing width/height if used
+    and clips to borders (of course).
+
+    Palette cross referencing option added for each object.  Lets  say  you've
+    got 6 spaceships on the screen but you want them each to have a  different
+    colour scheme.  Set the offset dword of [palxref]  to  point  to  a  cross
+    reference palette.  This way, many on-screen  objects  can  use  the  same
+    shape data but each can have a different colour scheme.
+
+    I got my 486DX66 today...(Friday Nov 5/93)
+
+    Due to popular demand, the camera is now the zeroth  object!!  Therefore,
+    all of your objects start a location 1 (1 = 1st object, 2 = 2nd object...)
+    The old way had the camera as the last object.  So,  to  move  the  camera
+    to location x,y,z in di frames: load up ebx,ecx,ebp as location to move to
+    load di with time to get there, load si  =  0  (cameraobject=0)  and  call
+    move_si.
+
+    The vector matrices have been truncated to 16  bits  from  32  bits.  The
+    accuracy of the code however, remains the same as before.  Note: Jan 8th,
+    Matrices have been pumped back up to 32 bit!!
+
+    Small, tini-weeni bug fixed in polyfill.  I am no longer using  doubleword
+    transfers to the VGA.  This  should  stop  people  having  their  monitors
+    destroyed - (just kidding)  It removes those eggs.
+
+    And yet another option! 1/4 scaled fuzzy bitmaps (for  lack  of  a  better
+    name). These are scalable, non-rotatable bitmaps just like the ones you've
+    seen before (option 32) but only every 4'th pixel is  sampled.   This  has
+    the advantage of faster plotting of bitmaps that don't require  a  lot  of
+    accuracy - like explosions and smoke.  To invoke this new type of  bitmap,
+    just use option 33 (32+1) in either the object definition or in userotate.
+    (note: if used in object, bitmap is part of object. if used in  userotate,
+    entire object is one big bitmap - like I said, good for explosions)
+
+    Holly Kamolly, this thing is getting big...
+
+    All surface/polygon options have now been set to defines.  Look in the equ
+    file to see what options there are.  This now replaces using 512+256+2+...
+    in your object.  (makes understanding them easier)  The new defines are:
+
+    excerpt from equ.inc: current list of commands and texture options
+
+      ; texture options (texture1&2)
+      wavey    equ 1       ; sine wave surface
+      shade    equ 2       ; lambert shaded surface
+      inverse  equ 4       ; inverse shading
+      glow     equ shade+inverse
+      last     equ 8       ; colour is same intensity as previous surface
+      texture  equ 16      ; texture mapped surface
+      mesh     equ 32      ; mesh style polygons
+
+      ; surface types   (command)
+      point    equ 32      ; surface is a point
+      line     equ 64      ; surface is a line
+      himap    equ 128     ; scalable, non-rotatable, hi quality bitmap
+      lomap    equ himap+1 ; scalable, non-rotatable, lo quality bitmap
+
+      ; surface commands(command)
+      iterate  equ 256     ; generate iteration below if side visible
+
+      ; visibility determination methods (command)
+      both     equ 1       ; always visible, no matter side
+      double   equ 2       ; double sided surface, other side has texture2 and colour2
+      onscr    equ 4       ; is polygon on screen?
+      check    equ 8       ; check if polygon is on screen/counter-clockwise, but don't plot
+
+     to be used in the format:
+
+     dw commands,texture1,texture2,colour1,colour2, connections, [0,0,0]
+
+   Don’t trust the above list as gospel, look in the file equ.inc to make sure
+   your using them correctly.  Revisions will show up in equ.inc but they  may
+   not make it to this list.
+
+   The objects now have user-definable resolutions.  Look at the objects.inc
+   file to see how I have implemented this.  The first dd is the  resolution
+   at which the next offset  is  visible  at.   Successive  resolutions  are
+   visible  at farther distances.  The only object I have  implemented  with
+   a different resolution is that bit-mapped cube thingy.  Notice as it  gets
+   farther away, the chrome balls turn into single pixels.   The  end  flag
+   for "this is the last resolution" is -1.
+
+  Additions for 3.5 - Feb 1/94
+
+    Joystick routines added - see joystick.asm.
+
+    It is now possible to have sub-objects part of main  objects.   Note  that
+    this is different from the iterations. Iterations are  sub-surfaces,  sub-
+    objects are things like turrets on tanks, radar dishes on spaceships.  The
+    sub-object is defined so that your code can alter the angle of the sub-obj
+    without   having  to  calculate  the  resulting  rotation/offset  of  that
+    sub-object.  Eg:  All you will have to do to make a radar dish on a  space
+    ship and  rotate  the  y  value - the resulting angle (because  the  space
+    ship itself will be rotating) is automatically calculated for  you.   This
+    way, you don't have to worry about compounding rotational  matrices,  the
+    program does it for you.  Look in objects.inc for an  example  of  how  to
+    make an object  with  a  sub-object  attached.   There  you  will  find  a
+    Rectangle with two sub-objects attached.  (This would be really  neat  for
+    making a robot eh!!)
+
+    If you were having trouble with point_time or twist_si, I found a bug with
+    the sign extending of the rotation - These routines now work fine.
+
+    Due to my poor memory, (not the computers memory, my memory)  I  have  now
+    commented the routines.  Heck, even I was forgetting how to use them.
+
+    I promised PCX decoding  for  3.1   but  I've  found  that  the  LZW  .GIF
+    compression is much tighter than PCX. I will have to attribute the LOADGIF
+    routine to Rich Geldreich.  I simply took his QBasic routine and converted
+    it to protected mode assembly.  I guess it could be optimized -  but  who
+    really cares?
+
+    In a fit of optimization, I have modified most words to doublewords.  This
+    is after the realization that in protected mode, mov ax,bx is slower  than
+    mov eax,ebx.  Most shr ax,1 have been changed  to  shr  eax,1.  Most  word
+    labels have been changed to doubleword lables - not all, but most.
+
+    The irq can now have user-definable subroutines.  Just set _irqcontrol0 to
+    the offset of the routine you want to be called every 1/70'th of a second.
+    This is only available if you have the protected mode IRQ running.   There
+    are 3 (count 'em, three!) possible IRQ subroutine controls.  To disable  a
+    IRQ subroutine, set the offset to offset _ret.
+
+    A practical example of the IRQ subroutine  thingy  is  shown  in more.inc.
+    In this file you  should  find  the  new  IRQ  controlled  palette  fading
+    routines.
+
+    The latest options!: GOSUB, RETURN, GOTO_OFFSET.   These  obscure  options
+    can be used in the object data definition  to  re-direct  the  loading  of
+    surface data and to prevent multiple copies of data.  I have no  idea  why
+    you would want this function or where you could use this, but you  let  me
+    know if this is usable.  I just kinda got bored one day...
+
+    Another great option is the non-fiaxble semi glocos and there fort basm at
+    40 pixels per screen width blah blah blah. Just testing to see  if  anyone
+    actually reads this stuff.  Gotcha.
+
+    Someone told me that 16 colours per shading table was not enough,  so  the
+    QBASIC program SHADING.BAS has been modified to allow the user to  generate
+    custom shading tables to any length.  The palette can now be utilized  for
+    32 colours per shaded surface, or 48, or 64 or whatever  you  want.   Even
+    odd shading table sizes could be used like 41 or 23. (Like, who would  use
+    that..?)  Right now, I have it set to 16 colours per lambert shade -  this
+    gives me 16 colours per side with a total of 16 different colours (256/16)
+    Changing it to 32 colours per side would leave you with 8  total  colours.
+    You get the idea right?  Be careful when mixing odd  shading  table  sizes
+    with the "LAST" texture command.  The "LAST" command uses the intensity of
+    the last surface and it wont work with non 2's complement  shading   table
+    sizes.  (If you don’t get that, just set the table sizes to 16,32,64,128..)
+
+    The Twist_si routine has been fixed so sign  extended  rotation  now works
+    perfectly - not that anyone cares...
+
+  Version 3.6: May 31/94
+
+    The animation routine "animate_this" now uses a user-definable subroutine
+    for screen updating - this is so each animation in a demo/game  can  have
+    a different background or include stars or not, what ever the user wants.
+
+    Mark Rosteck now has correct spelling to his name
+
+    Another small bug was found and squashed.  LROTATE no longer goes out  of
+    range.
+
+    Auto Shading Intensity option has been added.  Now, if you want an object
+    to appear as if it has lambert-normal shading to it, but  you  don’t  care
+    if the surfaces change color as it rotates, you can use this  option  and
+    the pre-calculation routines will calculate "what intensity  should  this
+    surface be at".  This is really good for objects that are  on the  ground
+    and will never be rotated, but you want them to have the appearance of  a
+    light source.
+
+    The big addition to 3.6 is the conversion program to  convert  DXF  to  a
+    workable 3dvector format.  There are tonnes (metric) of  options  so  you
+    should really check it out - DXF23DV2.ZIP (It can also convert PLG's)
+
+    All include files (*.inc) that define external routines  (eg _gopth:near)
+    have been renamed to *.ext to avoid confusion over routines and externals
+
+    John McCarthy would like to  say  HI!  to  those  people  who  have  sent
+    postcards, just to name a few:
+
+      Cata Lee (also Ted)  - Romania
+      Peter Hinz           - South Africa
+      Ivan Scheers         - Belgium
+      Laurent Passebecq    - France
+      Tony Tod             - South Wales
+      Nicholas Christopher - Ottawa
+
+      Everbody from around the US! ..and also to that guy from Brazil (I
+      forget your name)  And Hi to that guy from  Alberta  whose  school
+      burnt down! (did they rebuild it yet?)   And  Hi  to  the  guy  in
+      Austin. TX. with the Startrek game!
+
+      There are many more and many more who called but I don’t have names
+      for all - Hi to all of you also.
+
+    Does anyone have a mod to 669 converter?  I really really need one...
+
+    Or does anyone have MIDI .PAT file player in protected mode assembly for
+    the GUS?  (simple request eh?)
+
+  Version 3.7:  June 22/94  (My mothers birthday today!)
+
+    The stars routine has been optimized even more! (Oooo,wow)
+
+    A new surface type called MESH.  Guess.  Its that  screen  door  type  of
+    thingy I saw in REND386 (ug).  Use it, you'll see what its like.
+
+    XY screen tolerancing is now part of the 25  words  in  the  object.  See
+    objects.inc for explanation.
+
+    Glenz vectors are now possible with  the  "glenz"  texture  option.   The
+    colour of the surface refers to a cross referenced palette from which the
+    glenz polygon will derive it's new colours.  Put  the  cross  referencing
+    palette offset into xreftable and make the colour index  the  palette  in
+    the table.  As of this writing, I have no good cross referencing palettes
+    and therefore the glenz vector table I have looks kind of crappy.   Maybe
+    I will write a program to generate the glenz tables someday.
+
+    Another great option!  Stone textures.  I looked at Alone In The Dark and
+    really liked the texture on the stones/walls. This texture is implemented
+    by simply adding the term "stone" to  the  texture  type.   This  is  NOT
+    texture mapping (yet).  But it is fast and I think it  looks  neat.   The
+    Qbasic program stone.bas allows you to make new stone textures.  You must
+    point the table "stonetbl" to the stone texture you  want  to  use.   The
+    colour for the surface refers the the  type  of  stone  texture  to  use.
+    Therefore, you can combine this option with the  shade  option  and  have
+    shaded stone textures.  All you have to do is make  16  different  shaded
+    stone include files.  (As I have done in the examples).  The stone option
+    kind of rolls around on the screen, but I still like it anyway.
+
+    More 32bit optimization has been done.  Trust me.
+
+   Version 3.8: Oct 1'94
+
+    This entire version of 3DVECT was made  special  for  Sebastian  Dwornik.
+    Sebastian is envious that I get postcards from around the  world  and  if
+    I had his postal code, I could re-direct all my postcards to him  and  he
+    would be very thankful.  But I don’t have his postal code so he is out  of
+    luck.  See the top of this file for my address, mention his name  and  he
+    will be absolutely elated.
+
+    OK, lots of things changed for 3dvect38. First, all object incrementation
+    is now irq controlled.  This means that even on a 386sx25 with turbo off,
+    the movement will exactly match that of  my  DX66.   The  IRQ  controlled
+    movement calling is a much better method  than  the  previous  method  of
+    timing the vertical re-trace.
+
+    All point addresses are changed to 32 bit.
+
+    I actually implemented a glenz vector object  for  you.   These types  of
+    surfaces were possible before but nobody knew about them because I hadn't
+    shown one on the screen.  See to diamond in main1.exe.  Aren't they cool?
+
+    The functions for moving around have been moved  to  "function.asm"   The
+    animation routines have been totally removed as they do not support  some
+    of the new functions.  Wait for 3dvect39 or something.
+
+    The surface sorting now uses 4 points instead of 2, much  better  sorting
+    for complex objects.
+
+    Complied bitmaps are possible, notice the cockpit interior  (ripped  from
+    some popular game, don’t know which one.
+
+    GUS now supports SB as well.  Well, sort of, I don’t have a SB so I had to
+    code the routines blind.  I hope they work.
+
+    There are more changes, but I cant think of the important ones right now.
+    Who really cares anyway?  As long as it works.
+
+    I just had a very depressing thought. It  is  Saturday  night,  Oct  1/94.
+    As I write this, it had been 5 years to the day, no,make that to the hour
+    since I have done the the wild thing.  (I can't even  SAY  the  word.)  I
+    think I am going to crash my Suzuki.  Man is that depressing...
+
+    All for today. Send me that postcard.
+
+   Version 3.9: Oct 30 '94
+
+    Warning! If you have 3dvect38.zip, it has a virus in it!  I did not  know
+    that my machine had the stupid Tai-Pan Virus on it when  I  collected   a
+    new version of 3dvectors.  So if  you've  downloaded  3dvect38.zip,  scan
+    all .exe's on your hard-drive.  The virus infected the DXF23DV  converter.
+    I had no idea it was on my machine. Don't worry though, the Tai-Pan virus
+    is absolutely harmless.
+
+    Now for the real change.   Many millions of thanks to  Chris  Didamo  for
+    optimizing my stupid bubble sort into a selection sort.  I had known  for
+    sometime that the bubble sorts were a major slowdown but never got around
+    to fixing it.  I didn't realize how much faster it would  go.   There  is
+    now a shell sort and man does it whip!  Thanks Chris, I take back all the
+    nasty things I ever said about you  :-)
+
+
+

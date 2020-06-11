@@ -1,0 +1,856 @@
+        public _setbuf
+        public _putdosmsg
+        public _strhtn
+        public _strlen
+        public _strltu
+        public _get_float32
+        public _strhtn
+        public _strlen
+        public _strltu
+        public _vct32
+        public _vct16
+        public _cv32
+        public _cv16
+        public _imul32
+        public _idiv32
+        public _dos_float32
+        public _dos_dec16
+        public _dos_hex8
+        public _dos_hex16
+        public _dos_hex32
+        public _dos_ret
+        public _dos_string4
+        public _write_null
+        public _write_string4
+        public _write_dec16
+        public _write_ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write a return to DOS
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_dos_ret:
+        mov eax,00240a0dh
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write eax to dos
+; eg eax = "$!ih"  outputs hi!
+;    eax = "NHOJ"  outputs JOHN
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+_dos_string4:
+        mov fv,eax
+        mov edx,offset fv
+        jmp _putdosmsg
+
+fv      dd 0
+        db "$"
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write eax as 32bit hex
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_dos_hex32:
+        call _cv32
+        push ebp
+        call _dos_string4
+        pop eax
+        jmp _dos_string4
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write ax as 16bit hex
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_dos_hex16:
+        call _cv32
+        jmp _dos_string4
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write ax as 8bit hex
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_dos_hex8:
+        call _cv32
+        push ax
+        mov eax,00240000h
+        pop ax
+        jmp _dos_string4
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write ax as a decimal number, hex to decimal conversion
+; eg ax=4a2eh outputs 18990
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_dos_dec16:
+        call _cv16
+
+        mov xq,0
+        mov vc,eax
+
+        shr eax,16
+        call dropchar2
+        shr eax,12
+        call dropchar2
+        shr eax,8
+        call dropchar2
+        shr eax,4
+        call dropchar2
+        mov xq,1
+        call dropchar2
+        ret
+
+chars   db "0123456789abcdef"
+byte2   db "0$"
+vc      dd 0
+xq      dw 0
+
+dropchar2:
+        and ax,0fh
+        cmp ax,0
+        jne jo0
+        cmp xq,0
+        je nxq
+jo0:
+        mov xq,1
+        and ax,0fh
+        movzx esi,ax
+        mov bl,chars[esi]
+        mov byte2,bl
+        mov edx, offset byte2
+        call _putdosmsg
+nxq:
+        mov eax,vc
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; output eax as psuedo floating point number to DOS
+;
+; eg eax = 12347a6ch outputs 4660.47821
+;          ^^^^
+; whole portion
+;              ^^^^ fractional portion
+;
+; Listen, its late and I dont really care if the routine is sloppy OK!
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+ precision = 4      ; eg 91.8874
+;precision = 5      ; eg 91.88743   <- 3 is questionable!
+
+_dos_float32:
+        push eax
+        test eax,80000000h
+        jz nonegit
+        neg eax
+        pop ebx
+        push eax
+        mov eax,"$-"
+        call _dos_string4
+nonegit:
+        pop eax
+        push eax
+        shr eax,16
+        call _dos_dec16
+
+        pop eax
+        and eax,0000ffffh
+        jz outahere
+
+        imul eax,10000
+        cdq
+        mov ebx,65536
+        idiv ebx
+
+        push edx
+
+        call _cv16
+
+        mov vc,0
+        mov xq,ax
+
+        call dropchar3
+        shl vc,8
+        shr eax,4
+        call dropchar3
+        shl vc,8
+        shr eax,8
+        call dropchar3
+        shl vc,8
+        shr eax,12
+        call dropchar3
+
+        pop eax
+
+        if precision eq 5
+        cdq                ; this calcs the last decimal
+        imul eax,10
+        shr eax,16
+
+        cmp al,0           ; check if decimal is nulls
+        jne etoutall
+        endif
+
+        cmp vc,"0000"
+        je outahere
+etoutall:
+
+        if precision eq 5
+        push eax
+        cmp al,0
+        jne etggo
+        endif
+
+        cmp byte ptr [vc+3],"0"
+        jne etggo
+        mov byte ptr [vc+3],"$"
+        cmp byte ptr [vc+2],"0"
+        jne etggo
+        mov byte ptr [vc+2],"$"
+        cmp byte ptr [vc+1],"0"
+        jne etggo
+        mov byte ptr [vc+1],"$"
+
+etggo:
+        mov eax,"$."
+        call _dos_string4
+        mov eax,vc
+        call _dos_string4
+
+        if precision eq 5
+        pop eax
+        cmp al,0
+        je outahere
+        call _dos_dec16 ; this outputs the last decimal
+        endif
+
+outahere:
+        ret
+
+dropchar3:
+        and eax,0fh
+        mov bl,chars[eax]
+        or  byte ptr vc,bl
+        mov ax,xq
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; convert ax from dec number to eax as string
+; eg ax=51324 decimal returns eax=51324h
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_cv16:
+        xor ecx,ecx
+        xor dx,dx
+        mov bx,10000
+        div bx
+        or cl,al
+        shl ecx,4
+        mov ax,dx
+        xor dx,dx
+        mov bx,1000
+        div bx
+        or cl,al
+        shl ecx,4
+        mov ax,dx
+        xor dx,dx
+        mov bx,100
+        div bx
+        or cl,al
+        shl ecx,4
+        mov ax,dx
+        xor dx,dx
+        mov bx,10
+        div bx
+        or cl,al
+        shl ecx,4
+        or cl,dl
+        mov eax,ecx
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; convert eax = 12345678h  to eax = "4321"  ebp = "8765"
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_cv32:
+        mov cl,28
+        mov edx,8
+        mov esi,eax
+cvxl:
+        shrd eax,ebp,8
+        shr ebp,8
+        mov edi,esi
+        shr edi,cl
+        and edi,0fh
+        mov bl,chars[edi]
+        shl ebx,24
+        or ebp,ebx
+        sub cl,4
+        dec edx
+        jnz cvxl
+
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; multiply eax by ebx 16bt fixed point
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_imul32:
+        imul ebx
+        shrd eax,edx,16
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; divide eax by ebx 16bt fixed point
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_idiv32:
+        cdq
+        shld edx,eax,16
+        shl eax,16
+        idiv ebx
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; simple routine to convert eax = 0087654h -> eax = 87654 decimal (15666h)
+; i guess i should have done this in a loop...
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+_vct32:
+        push eax
+        shr eax,28
+        mov ebx,10000000
+        and eax,0fh
+        mul ebx
+        mov ecx,eax
+        pop eax
+
+        push eax
+        shr eax,24
+        mov ebx,1000000
+        and eax,0fh
+        mul ebx
+        mov ecx,eax
+        pop eax
+
+        push eax
+        shr eax,20
+        mov ebx,100000
+        and eax,0fh
+        mul ebx
+        mov ecx,eax
+        pop eax
+_vct16:
+        push eax
+        shr eax,16
+        mov ebx,10000
+        and eax,0fh
+        mul ebx
+        mov ecx,eax
+        pop eax
+
+        push eax
+        shr eax,12
+        mov ebx,1000
+        and eax,0fh
+        mul ebx
+        add ecx,eax
+        pop eax
+
+        push eax
+        shr eax,8
+        mov ebx,100
+        and eax,0fh
+        mul ebx
+        add ecx,eax
+        pop eax
+
+        push eax
+        shr eax,4
+        mov ebx,10
+        and eax,0fh
+        mul ebx
+        add ecx,eax
+        pop eax
+
+        and eax,0fh
+        add eax,ecx
+
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Make all lower case letters in string uppercase
+; In:
+;   EDX -> string
+; Out:
+;   None
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_strltu:
+        push ax
+        push edx
+strltuml:
+        mov al,[edx]
+        or al,al
+        jz short strltumld
+        cmp al,'a'
+        jb short strltumlf0
+        cmp al,'z'
+        ja short strltumlf0
+        sub al,'a'-'A'
+        mov [edx],al
+strltumlf0:
+        inc edx
+        jmp strltuml
+strltumld:
+        pop edx
+        pop ax
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Get length of ASCIIZ string
+; In:
+;   EDX -> string
+; Out:
+;   EAX - length
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_strlen:
+        push ecx
+        push edi
+        mov edi,edx
+        mov ecx,-1
+        xor al,al
+        repnz scasb
+        mov eax,-2
+        sub eax,ecx
+        pop edi
+        pop ecx
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Get number from mem
+; In:
+;   EDX -> ASCIIZ hex number string
+; Out:
+;   EAX - number
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_strhtn:
+        push bx
+        push edx
+        xor eax,eax
+strhtnml:
+        mov bl,[edx]
+        inc edx
+        sub bl,'0'
+        jc short strhtnmld
+        cmp bl,0ah
+        jb short strhtnmlc
+        sub bl,('A'-'0')-10
+strhtnmlc:
+        shl eax,4
+        or al,bl
+        jmp strhtnml
+strhtnmld:
+        pop edx
+        pop bx
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Get psuedo floating point number from mem
+; In:
+;   EDX -> ASCIIZ hex number string
+; Out:
+;   EAX - number
+;         where high word is whole portion
+;         and low word is fractional portion
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+_get_float32:
+        mov getsx,0
+        cmp byte ptr [edx],"-"
+        jne getnonegd
+        inc edx
+        inc getsx
+getnonegd:
+        push edx
+        call _strhtn
+        call _vct16
+        pop edx
+
+        push eax      ; save whole portion
+getfinddotq:
+        mov al,[edx]
+        cmp al,"."
+        je getokdotq
+        cmp al,"0"
+        jb getnodotq
+        cmp al,"9"
+        ja getnodotq
+        inc edx
+        jmp getfinddotq
+getnodotq:
+        pop eax
+        shl eax,16
+getckneg:
+        mov esi,eax
+        cmp al,0           ; test to see if round up should occur
+        je getff
+
+        test eax,80000000h
+        jz nonegitq
+        neg eax
+nonegitq:
+        and eax,0000ffffh
+        imul eax,10000
+        cdq
+        mov ebx,65536
+        idiv ebx
+
+        mov eax,edx
+        cdq                ; this calcs the last decimal
+        imul eax,10
+        shr eax,16
+
+        cmp al,0           ; check if decimal is nulls
+        je getff
+        inc esi ; rounds 99.99999 to 100, also, 92.7 is 92.6999, this fixes that!
+getff:
+        mov eax,esi
+        cmp getsx,0
+        jz getouthq
+        neg eax
+getouthq:
+        ret
+
+getsx   db 0
+
+getokdotq:
+        inc edx
+        xor eax,eax
+
+        call getkk
+        jc getnot
+        shl ebx,16
+        or eax,ebx
+        call getkk
+        jc getnot
+        shl ebx,12
+        or eax,ebx
+        call getkk
+        jc getnot
+        shl ebx,8
+        or eax,ebx
+        call getkk
+        jc getnot
+        shl ebx,4
+        or eax,ebx
+        call getkk
+        jc getnot
+        or eax,ebx
+getnot:
+        call _vct32
+        cdq
+        shld edx,eax,16
+        shl eax,16
+        mov ebx,100000
+        idiv ebx
+        pop ebx
+        shl ebx,16
+        or eax,ebx
+        jmp getckneg
+
+getkk:
+        xor ebx,ebx
+        mov bl,[edx]
+        inc edx
+        sub bl,'0'
+        jc short gstrhtnmld
+        cmp bl,0ah
+        ja short gstrhtnmld
+        clc
+        ret
+
+gstrhtnmld:
+        stc
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Put '$' terminated message to DOS
+; In:
+;   EDX -> message in low mem
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_putdosmsg:
+        push ax edx
+        add edx,_code32a
+        mov al,dl
+        and ax,0fh
+        shr edx,4
+        mov v86r_ds,dx
+        mov v86r_dx,ax
+        mov v86r_ah,9
+        mov al,21h
+        int 33h
+        pop edx ax
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Initialize file buffer
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_setbuf:
+        mov eax,_lomembase
+        mov _filebufloc,eax
+        mov _filebuflen,4000h
+        add _lomembase,4000h
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write a return to file
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_write_ret:
+        mov eax,00000a0dh
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Write eax=string4 to file
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_write_string4:
+        mov tempx,eax
+        mov edx,offset tempx
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; Write null terminated string to file
+; EDX = ASCIIZ string
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_write_null:
+        call _strlen
+        mov ecx,eax
+        jmp  _writefile
+
+tempx   dd 0
+        db 0
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write ax as a decimal number to file, hex to decimal conversion
+; eg ax=4a2eh outputs 18990
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_write_dec16:
+        call _cv16
+
+        mov xqx,0
+        mov vcx,eax
+
+        shr eax,16
+        call dropchar4
+        shr eax,12
+        call dropchar4
+        shr eax,8
+        call dropchar4
+        shr eax,4
+        call dropchar4
+        mov xqx,1
+        call dropchar4
+        ret
+
+charsx  db "0123456789abcdef"
+vcx     dd 0
+xqx     dw 0
+
+dropchar4:
+        and ax,0fh
+        cmp ax,0
+        jne jo4
+        cmp xqx,0
+        je nx4
+jo4:
+        mov xqx,1
+        and ax,0fh
+        movzx esi,ax
+        mov bl,charsx[esi]
+        mov al,bl
+        xor ah,ah
+        call _write_string4
+nx4:
+        mov eax,vcx
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; output eax as psuedo floating point number to FILE
+;
+; eg eax = 12347a6ch outputs 4660.47821
+;          ^^^^
+; whole portion
+;              ^^^^ fractional portion
+;
+; Listen, its late and I dont really care if the routine is sloppy OK!
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+ precision = 4      ; eg 91.8874
+;precision = 5      ; eg 91.88743   <- 3 is questionable!
+
+_write_float32:
+        push eax
+        test eax,80000000h
+        jz wnonegit
+        neg eax
+        pop ebx
+        push eax
+        mov eax,"-"
+        call _write_string4
+wnonegit:
+        pop eax
+        push eax
+        shr eax,16
+        call _write_dec16
+
+        pop eax
+        and eax,0000ffffh
+        jz woutahere
+
+        imul eax,10000
+        cdq
+        mov ebx,65536
+        idiv ebx
+
+        push edx
+
+        call _cv16
+
+        mov vc,0
+        mov xq,ax
+
+        call wdropchar3
+        shl vc,8
+        shr eax,4
+        call wdropchar3
+        shl vc,8
+        shr eax,8
+        call wdropchar3
+        shl vc,8
+        shr eax,12
+        call wdropchar3
+
+        pop eax
+
+        if precision eq 5
+        cdq                ; this calcs the last decimal
+        imul eax,10
+        shr eax,16
+
+        cmp al,0           ; check if decimal is nulls
+        jne wetoutall
+        endif
+
+        cmp vc,"0000"
+        je woutahere
+wetoutall:
+
+        if precision eq 5
+        push eax
+        cmp al,0
+        jne wetggo
+        endif
+
+        cmp byte ptr [vc+3],"0"
+        jne wetggo
+        mov byte ptr [vc+3],"$"
+        cmp byte ptr [vc+2],"0"
+        jne wetggo
+        mov byte ptr [vc+2],"$"
+        cmp byte ptr [vc+1],"0"
+        jne wetggo
+        mov byte ptr [vc+1],"$"
+
+wetggo:
+        mov eax,"."
+        call _write_string4
+        mov eax,vc
+        call _write_string4
+
+        if precision eq 5
+        pop eax
+        cmp al,0
+        je woutahere
+        call _write_dec16 ; this outputs the last decimal
+        endif
+
+woutahere:
+        ret
+
+wdropchar3:
+        and eax,0fh
+        mov bl,chars[eax]
+        or  byte ptr vc,bl
+        mov ax,xq
+        ret
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+; write ax as a decimal number to memory at EDX
+; with sign extension, right justified, and zero terminated
+; eg ax=f79fh outputs -2145
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+_write_neg16:
+        push eax
+        xor al,al
+        mov edi,edx
+        mov ecx,7
+        rep stosb
+        pop eax
+
+        mov vvq,edx
+        mov vvc,edx
+        test eax,8000h
+        jz wnonegiq
+        neg eax
+        mov byte ptr [edx],"-"
+        inc vvq
+wnonegiq:
+        call _cv16
+
+        mov xqq,0
+        mov vcq,eax
+
+        shr eax,16
+        call dropchar5
+        shr eax,12
+        call dropchar5
+        shr eax,8
+        call dropchar5
+        shr eax,4
+        call dropchar5
+        mov xqq,1
+        call dropchar5
+
+        mov ecx,vvq
+        sub ecx,vvc
+        mov edi,vvc
+        add edi,6
+        mov esi,vvq
+        inc ecx
+dp_loop:
+        mov al,[esi]
+        mov [edi],al
+        dec edi
+        dec esi
+        loop dp_loop
+dp_ss:
+        cmp edi,vvc
+        jb dp_out
+        mov byte ptr [edi]," "
+        dec edi
+        jmp dp_ss
+dp_out:
+        mov edx,vvc
+        ret
+
+charsq  db "0123456789abcdef"
+vcq     dd 0
+xqq     dw 0
+vvq     dd 0
+vvc     dd 0
+
+dropchar5:
+        and ax,0fh
+        cmp ax,0
+        jne jo5
+        cmp xqq,0
+        je nx5
+jo5:
+        mov xqq,1
+        and ax,0fh
+        movzx esi,ax
+        mov bl,charsx[esi]
+        mov edx,vvq
+        mov [edx],bl
+        inc vvq
+nx5:
+        mov eax,vcq
+        ret
+
+
