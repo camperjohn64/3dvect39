@@ -1,0 +1,9 @@
+
+         extrn _compile_foreground:near
+         extrn _compile_background_dl:near
+         extrn _compile_xy:near
+
+         extrn _gif_squeeze_y:near
+         extrn _gif_squeeze_x:near
+
+

@@ -1,0 +1,210 @@
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+;
+; Filename     : 3d.ext
+; Included from: Any program which requires data from 3D1.ASM, 3D2.ASM, 3D3.ASM
+; Description  : Externals for 3D1.ASM, 3D2.ASM, 3D3.ASM
+;
+; Written by: John McCarthy
+;             1316 Redwood Lane
+;             Pickering, Ontario.
+;             Canada, Earth, Milky Way (for those out-of-towners)
+;             L1X 1C5
+;
+; Internet/Usenet:  BRIAN.MCCARTHY@CANREM.COM
+;         Fidonet:  Brian McCarthy 1:229/15
+;   RIME/Relaynet: ->CRS
+;
+; Home phone, (905) 831-1944, don't call at 2 am eh!
+;
+; Send me your protected mode source code!
+; Send me your Objects!
+; But most of all, Send me a postcard!!!!
+;
+;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같
+
+; data definition offsets: shape data, _bitmap data, _bitmap scaling, xref palette
+
+         extrn _objbase:dword, _bitbase:dword, _bitx:dword, _bity:dword
+         extrn _xreftable:dword, _stonetbl:dword, _stoneadd:byte
+
+; these are tables of values for defining object locations
+; sizes of tables = maxobjects
+
+         extrn _xs:dword, _ys:dword, _zs:dword
+         extrn _xadds:dword, _yadds:dword, _zadds:dword
+         extrn _vxs:word, _vys:word, _vzs:word
+         extrn _vxadds:word, _vyadds:word, _vzadds:word
+         extrn _lcount:word, _acountx:word, _acounty:word , _acountz:word
+         extrn _whatshape:word, _userotate:byte, _onoff:byte
+         extrn _palxref:byte, _bitobjx:word, _bitobjy:word
+
+; these are single values for defining the camera location
+
+         extrn _eyex:dword, _eyey:dword, _eyez:dword
+         extrn _eyeax:word, _eyeay:word, _eyeaz:word
+         extrn _eyexadds:dword, _eyeyadds:dword, _eyezadds:dword
+         extrn _eyevxadds:word, _eyevyadds:word, _eyevzadds:word
+         extrn _eyelcount:word, _eyeacountx:word, _eyeacounty:word , _eyeacountz:word
+
+; misc data
+
+         extrn _vmatrix:dword
+         extrn _tmatrix:dword
+         extrn _ematrix:dword
+         extrn _lmatrix:dword
+         extrn _y_angle_of_sun:dword
+         extrn _ecosx:dword
+         extrn _esinx:dword
+         extrn _ecosy:dword
+         extrn _esiny:dword
+         extrn _ecosz:dword
+         extrn _esinz:dword
+
+         extrn _cam_follow:dword
+         extrn _cam_wherelook:dword
+         extrn _cam_oldspeed:dword
+
+; for scale routine
+
+         extrn _bitmap:dword
+         extrn _scale_destwidth:word
+         extrn _scale_destheight:word
+         extrn _scale_destx:word
+         extrn _scale_desty:word
+
+; for _fakeline_horz routine
+
+         extrn _x1:word
+         extrn _y1:word
+         extrn _x2:word
+         extrn _y2:word
+
+; for calling _polyfill (after calling _fakeline_horz)
+
+         extrn _colq:byte
+
+; for windowing
+
+         extrn _3d_makeorder:dword
+         extrn _poly_oney:word
+         extrn _poly_firstbyte:word
+         extrn _poly_lastbyte:word
+         extrn _showing:word
+
+; misc routines from 3d.asm and poly.inc
+
+         extrn _fakeline_horz:near
+         extrn _fakeline_vert:near
+         extrn _polyfill:near
+         extrn _makeobjs:near
+         extrn _make1obj:near
+         extrn _setsincose:near
+         extrn _init_tables:near
+         extrn _flush_surfaces:near
+         extrn _clipped_line:near
+         extrn _set_clip_absolute:near
+         extrn _set_clip_offset:near
+         extrn _drawvect:near
+         extrn _sortlist:near
+         extrn _copy_virtual_objects:near
+
+; poly.inc - fast imul table, eg: _screen_width*si = _fastimultable[si]
+
+         extrn _fastimultable:dword
+
+; _xscale1.inc
+
+         extrn _xscale1:near
+         extrn _xscale2:near
+         extrn _xscale4:near
+         extrn _draw_scale:near
+         extrn _tdraw_scale:near
+         extrn _tdraw_scale4:near
+         extrn _repeat_bitmap:near
+
+; math.inc
+
+         extrn _make3d:dword
+         extrn _make3dx:dword
+         extrn _make3dy:dword
+         extrn _user3d:near
+         extrn _user3dx:near
+         extrn _user3dy:near
+         extrn _xsolve:near
+         extrn _ysolve:near
+         extrn _zsolve:near
+         extrn _rotate_by_camera:near
+         extrn _rotate_point:near
+         extrn _arctan:near
+         extrn _cosine:near
+         extrn _sine:near
+         extrn _setsincose:near
+         extrn _compound:near
+         extrn _sqrt:near
+         extrn _temp_matrix:near
+         extrn _temp_rotate_point:near
+         extrn _matrix_multiply:near
+         extrn _null_y_matrix:near
+         extrn _inverse_rotate:near
+         extrn _rotate_x:near
+         extrn _rotate_y:near
+         extrn _rotate_z:near
+         extrn _point_z:near
+
+         extrn _cliplt:word
+         extrn _cliprt:word
+         extrn _cliptp:word
+         extrn _clipbt:word
+         extrn _xcent:word
+         extrn _ycent:word
+         extrn _xmins:word
+         extrn _xmins1:word
+         extrn _xmaxs:word
+         extrn _xmaxs1:word
+         extrn _ymins:word
+         extrn _ymins1:word
+         extrn _ymaxs:word
+         extrn _ymaxs1:word
+
+         extrn _lambert:near
+         extrn _pre_cal_lambert:near
+         extrn _calc_normal:near
+         extrn _calc_d:near
+         extrn _set_up_all_lambert:near
+         extrn _l_rotate_point:near
+
+         extrn _lx1:dword
+         extrn _ly1:dword
+         extrn _lz1:dword
+         extrn _lx2:dword
+         extrn _ly2:dword
+         extrn _lz2:dword
+         extrn _lx3:dword
+         extrn _ly3:dword
+         extrn _lz3:dword
+
+; list of current assembley restraints - can be used to test if object file
+; was assembled with ample room/size of tables.
+
+         extrn _asm_version:word
+         extrn _asm_maxpoints:word
+         extrn _asm_maxsurfaces:word
+         extrn _asm_maxpolys:word
+         extrn _asm_maxobjects:word
+         extrn _asm_number_spaces:word
+         extrn _asm_xsize:word
+         extrn _asm_ysize:word
+         extrn _asm_usez:word
+         extrn _asm_cameraobject:word
+         extrn _asm_xmode:word
+         extrn _asm_ratiox:word
+         extrn _asm_ratioy:word
+         extrn _asm_xactual:word
+         extrn _asm_yactual:word
+         extrn _asm_pages:word
+         extrn _asm_shapes:dword
+         extrn _asm_bitmaps:word
+         extrn _asm_xpals:word
+         extrn _asm_div256:word
+
+
