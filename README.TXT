@@ -1,6 +1,6 @@
-This is a GNU release of the 1994 gaming engine 3DVECT39.
+This is a GNU release of the 1991 gaming engine 3DVECT39.
 
-3DVECT39 Source (c) 1994
+3DVECT39 Source (c) 1991-1994
 Released under the GNU GENERAL PUBLIC LICENSE - See below.
 
 3DVECT was an early 3D gaming engine, and experimental platform to 
@@ -9,7 +9,7 @@ engines, or any type of 3D documentation was available. Unlike
 most 2.5D games at the time, the goal of 3DVECT was to have the 
 ability to draw in the full range of 3D axis and co-ordinates.  
 
-The first versions of 3DVECT were released in 1992, with the 
+The first versions of 3DVECT were released in 1991, with the 
 final version in late 1994. 3DVECT had complete functions for 
 sound effects, music, 3d models, polygon surface attributes, 
 camera and object alloction and movement, joystick, keyboard and mouse  
